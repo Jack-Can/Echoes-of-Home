@@ -1,0 +1,22 @@
+/* 隐藏状态 */
+.hidden {
+  display: none !important;
+}
+
+/* 滚动条美化 */
+.chat-stream::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-stream::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-stream::-webkit-scrollbar-thumb {
+  background: #DDD;
+  border-radius: 3px;
+}
+
+.chat-stream::-webkit-scrollbar-thumb:hover {
+  background: #CCC;
+}

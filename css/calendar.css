@@ -1,0 +1,776 @@
+/* ========== 日历模块色彩系统 ========== */
+:root {
+  /* 主色 */
+  --cal-color-primary: #E8734A;
+  --cal-color-primary-light: #F5A882;
+  --cal-color-primary-bg: #FFF5F0;
+
+  /* 辅助色 */
+  --cal-color-warm-bg: #FFF8F3;
+  --cal-color-card-bg: #FFFFFF;
+  --cal-color-wood: #D4A574;
+
+  /* 文字色 */
+  --cal-color-text-primary: #2D2D2D;
+  --cal-color-text-secondary: #8C8C8C;
+  --cal-color-text-hint: #BFBFBF;
+
+  /* 消息气泡色 */
+  --cal-color-bubble-parent: #FFF3E0;
+  --cal-color-bubble-child: #E3F2FD;
+
+  /* 状态色 */
+  --cal-color-warmth: #FF6B9D;
+  --cal-color-joy: #FFB74D;
+  --cal-color-miss: #7986CB;
+  --cal-color-care: #81C784;
+
+  /* 天气色 */
+  --cal-color-weather-sunny: #FFB300;
+  --cal-color-weather-cloudy: #90A4AE;
+  --cal-color-weather-rainy: #5C6BC0;
+  --cal-color-weather-rainbow: #AB47BC;
+
+  /* 温度色 */
+  --cal-color-temp-cold: #42A5F5;
+  --cal-color-temp-warm: #FFA726;
+  --cal-color-temp-hot: #EF5350;
+
+  /* 圆角 */
+  --cal-radius-sm: 8px;
+  --cal-radius-md: 12px;
+  --cal-radius-lg: 16px;
+  --cal-radius-xl: 24px;
+
+  /* 阴影 */
+  --cal-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --cal-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --cal-shadow-popup: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  /* 动画 */
+  --cal-duration-fast: 150ms;
+  --cal-duration-normal: 300ms;
+  --cal-duration-slow: 500ms;
+  --cal-ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --cal-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --cal-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ========== 日历容器基础样式 ========== */
+.cal-container {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: var(--cal-color-warm-bg);
+  min-height: 100%;
+  border-radius: var(--cal-radius-lg);
+  padding: 16px;
+}
+
+/* ========== 日历头部 ========== */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 20px;
+}
+
+.cal-month-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--cal-color-text-primary);
+}
+
+.cal-nav-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--cal-color-card-bg);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: var(--cal-shadow-card);
+  transition: all var(--cal-duration-fast) ease;
+}
+
+.cal-nav-btn:hover {
+  box-shadow: var(--cal-shadow-hover);
+  transform: scale(1.05);
+}
+
+/* ========== 月历网格 ========== */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 13px;
+  color: var(--cal-color-text-secondary);
+  padding: 8px 0;
+}
+
+.cal-cell {
+  min-height: 80px;
+  background: var(--cal-color-card-bg);
+  border-radius: var(--cal-radius-md);
+  padding: 8px;
+  cursor: pointer;
+  transition: all var(--cal-duration-fast) ease;
+  box-shadow: var(--cal-shadow-card);
+}
+
+.cal-cell:hover {
+  box-shadow: var(--cal-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.cal-cell--other-month {
+  opacity: 0.4;
+}
+
+.cal-cell--today {
+  background: var(--cal-color-primary-bg);
+}
+
+.cal-cell--today .cal-cell-date {
+  background: var(--cal-color-primary);
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-cell--selected {
+  background: var(--cal-color-card-bg);
+  box-shadow: 0 0 0 2px var(--cal-color-primary);
+  border: 2px solid var(--cal-color-primary);
+}
+
+.cal-cell--selected .cal-cell-date {
+  color: var(--cal-color-primary);
+  font-weight: 700;
+}
+
+.cal-cell-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-cell-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.cal-cell-dot--chat {
+  background: #FF9800;
+}
+
+.cal-cell-dot--voice {
+  background: #4CAF50;
+}
+
+.cal-cell-dot--photo {
+  background: #2196F3;
+}
+
+.cal-cell-dot--warmth {
+  font-size: 10px;
+}
+
+.cal-cell-dot--anniversary {
+  font-size: 12px;
+}
+
+.cal-cell-more {
+  font-size: 11px;
+  color: var(--cal-color-text-hint);
+}
+
+/* ========== 时间线面板 ========== */
+.cal-timeline {
+  display: none;
+  background: var(--cal-color-card-bg);
+  border-radius: var(--cal-radius-lg);
+  margin-top: 16px;
+  padding: 16px;
+  box-shadow: var(--cal-shadow-card);
+}
+
+.cal-timeline.active {
+  display: block;
+  animation: slideUp var(--cal-duration-normal) var(--cal-ease-out);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cal-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+}
+
+.cal-timeline-date {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--cal-color-text-primary);
+}
+
+.cal-timeline-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #F5F5F5;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cal-timeline-summary {
+  font-size: 13px;
+  color: var(--cal-color-text-secondary);
+  padding: 8px 12px;
+  background: var(--cal-color-warm-bg);
+  border-radius: var(--cal-radius-sm);
+  margin-bottom: 12px;
+}
+
+.cal-timeline-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* ========== 消息气泡 ========== */
+.cal-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 80%;
+}
+
+.cal-msg--them {
+  align-self: flex-start;
+}
+
+.cal-msg--me {
+  align-self: flex-end;
+}
+
+.cal-msg-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--cal-color-text-secondary);
+}
+
+.cal-msg-avatar {
+  font-size: 16px;
+}
+
+.cal-msg-bubble {
+  padding: 10px 14px;
+  border-radius: var(--cal-radius-md);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cal-msg--them .cal-msg-bubble {
+  background: var(--cal-color-bubble-parent);
+}
+
+.cal-msg--me .cal-msg-bubble {
+  background: var(--cal-color-bubble-child);
+}
+
+/* ========== 天气和温度计 ========== */
+.cal-weather-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.cal-weather-icon {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.cal-temp-meter {
+  width: 24px;
+  height: 40px;
+  cursor: pointer;
+}
+
+/* ========== 温情标记按钮 ========== */
+.cal-warmth-btn {
+  opacity: 0;
+  font-size: 12px;
+  color: var(--cal-color-warmth);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--cal-duration-fast) ease;
+  padding: 4px 8px;
+  border-radius: var(--cal-radius-sm);
+}
+
+.cal-msg:hover .cal-warmth-btn {
+  opacity: 1;
+}
+
+.cal-warmth-btn:hover {
+  background: rgba(255, 107, 157, 0.1);
+}
+
+/* ========== 爱心动画 ========== */
+@keyframes heartFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(0.5);
+  }
+}
+
+.cal-heart {
+  position: absolute;
+  font-size: 16px;
+  pointer-events: none;
+  animation: heartFloat 0.8s var(--cal-ease-out) forwards;
+}
+
+/* ========== 收藏册 ========== */
+.cal-collection {
+  display: none;
+  padding: 16px;
+}
+
+.cal-collection.active {
+  display: block;
+}
+
+.cal-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cal-filter-tag {
+  padding: 6px 12px;
+  border: none;
+  background: #F5F5F5;
+  border-radius: 16px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cal-filter-tag.active {
+  background: var(--cal-color-primary-bg);
+  color: var(--cal-color-primary);
+}
+
+.cal-waterfall {
+  columns: 2;
+  column-gap: 12px;
+}
+
+.cal-collect-card {
+  break-inside: avoid;
+  background: var(--cal-color-card-bg);
+  border-radius: var(--cal-radius-md);
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--cal-shadow-card);
+}
+
+.cal-collect-card:hover {
+  box-shadow: var(--cal-shadow-hover);
+}
+
+/* ========== 年度报告 ========== */
+.cal-report {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--cal-color-warm-bg);
+  z-index: 1000;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+}
+
+.cal-report.active {
+  display: block;
+}
+
+.cal-report-screen {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.cal-report-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--cal-color-text-primary);
+  margin-bottom: 20px;
+}
+
+.cal-report-stat {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--cal-color-primary);
+}
+
+.cal-report-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--cal-color-card-bg);
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: var(--cal-shadow-card);
+  z-index: 1001;
+}
+
+/* ========== 纪念日提醒 ========== */
+.cal-memo-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--cal-color-primary-bg);
+  border-radius: var(--cal-radius-md);
+  margin-bottom: 12px;
+}
+
+.cal-memo-icon {
+  font-size: 20px;
+}
+
+.cal-memo-text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--cal-color-text-primary);
+}
+
+.cal-memo-btn {
+  padding: 6px 12px;
+  border: none;
+  background: var(--cal-color-primary);
+  color: #fff;
+  border-radius: var(--cal-radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ========== 倒计时卡片 ========== */
+.cal-countdown {
+  background: var(--cal-color-card-bg);
+  border-radius: var(--cal-radius-md);
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--cal-shadow-card);
+}
+
+.cal-countdown-title {
+  font-size: 14px;
+  color: var(--cal-color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.cal-countdown-days {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--cal-color-primary);
+}
+
+.cal-countdown-progress {
+  height: 8px;
+  background: #F0F0F0;
+  border-radius: 4px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.cal-countdown-bar {
+  height: 100%;
+  background: var(--cal-color-primary);
+  border-radius: 4px;
+  transition: width var(--cal-duration-normal) ease;
+}
+
+/* ========== 快捷按钮 ========== */
+.cal-quick-actions {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.cal-quick-btn {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  background: var(--cal-color-card-bg);
+  border-radius: var(--cal-radius-md);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--cal-duration-fast) ease;
+  box-shadow: var(--cal-shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cal-quick-btn:hover {
+  background: var(--cal-color-primary-bg);
+  color: var(--cal-color-primary);
+  box-shadow: var(--cal-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.cal-quick-btn:active {
+  transform: translateY(0);
+}
+
+/* ========== 消息气泡 ========== */
+.cal-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 80%;
+  animation: fadeInUp 0.3s ease;
+}
+
+.cal-msg--them {
+  align-self: flex-start;
+}
+
+.cal-msg--me {
+  align-self: flex-end;
+}
+
+.cal-msg-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--cal-color-text-secondary);
+}
+
+.cal-msg-avatar {
+  font-size: 16px;
+}
+
+.cal-msg-sender {
+  font-weight: 500;
+}
+
+.cal-msg-time {
+  opacity: 0.7;
+}
+
+.cal-msg-bubble {
+  padding: 10px 14px;
+  border-radius: var(--cal-radius-md);
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.cal-msg--them .cal-msg-bubble {
+  background: var(--cal-color-bubble-parent);
+}
+
+.cal-msg--me .cal-msg-bubble {
+  background: var(--cal-color-bubble-child);
+}
+
+.cal-msg-bubble--ai {
+  border: 2px solid var(--cal-color-warmth);
+  background: #FFF5F8 !important;
+}
+
+.cal-ai-label {
+  font-size: 11px;
+  color: var(--cal-color-warmth);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.cal-ai-original {
+  font-size: 12px;
+  color: var(--cal-color-text-secondary);
+  text-decoration: line-through;
+  margin-bottom: 4px;
+}
+
+.cal-ai-polished {
+  color: var(--cal-color-primary);
+  font-weight: 500;
+}
+
+.cal-msg-bubble--voice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-voice-icon {
+  font-size: 16px;
+}
+
+.cal-voice-waveform {
+  font-size: 12px;
+  letter-spacing: -1px;
+  color: var(--cal-color-text-secondary);
+}
+
+.cal-voice-duration {
+  font-size: 12px;
+  color: var(--cal-color-text-secondary);
+}
+
+.cal-voice-play {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--cal-color-primary);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cal-msg-bubble--photo {
+  max-width: 200px;
+}
+
+.cal-photo-placeholder {
+  font-size: 48px;
+  text-align: center;
+  padding: 10px;
+}
+
+.cal-photo-caption {
+  font-size: 12px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.cal-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.cal-warmth-btn {
+  font-size: 12px;
+  color: var(--cal-color-warmth);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--cal-radius-sm);
+  opacity: 0;
+  transition: opacity var(--cal-duration-fast) ease;
+}
+
+.cal-msg:hover .cal-warmth-btn {
+  opacity: 1;
+}
+
+.cal-warmth-btn:hover {
+  background: rgba(255, 107, 157, 0.1);
+}
+
+.cal-warmth-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== 温情收藏册头部 ========== */
+.cal-warmth-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cal-back-btn {
+  padding: 10px 16px;
+  border: none;
+  background: var(--cal-color-card-bg);
+  border-radius: var(--cal-radius-md);
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--cal-shadow-card);
+  transition: all var(--cal-duration-fast) ease;
+}
+
+.cal-back-btn:hover {
+  background: var(--cal-color-primary-bg);
+  color: var(--cal-color-primary);
+}
+
+.cal-warmth-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cal-color-text-primary);
+}

@@ -1,0 +1,14 @@
+# 忽略 .git 目录（实际上这个已经被 git 处理了，但为了规范还是加上）
+.git/
+
+# 忽略临时文件
+*.tmp
+*.log
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略编译输出（如果有的话）
+/dist
+/node_modules

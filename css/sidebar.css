@@ -1,0 +1,154 @@
+.logo {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.logo-text {
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  color: #2C3E50;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: #AAA;
+  letter-spacing: 4px;
+  margin-top: 4px;
+}
+
+/* 身份切换器 */
+.identity-switcher {
+  display: flex;
+  background: #F8F8F8;
+  border-radius: 30px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.identity-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 26px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.identity-btn.active {
+  background: #FFFFFF;
+  color: #2C3E50;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.identity-btn:hover:not(.active) {
+  color: #555;
+}
+
+/* 关系气象站 */
+.weather-card {
+  background: linear-gradient(135deg, #E8F4FD 0%, #FEF9E7 100%);
+  border-radius: 20px;
+  padding: 30px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.weather-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(255, 220, 100, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.weather-emoji {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.weather-status {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2C3E50;
+  margin-bottom: 6px;
+}
+
+.weather-detail {
+  font-size: 13px;
+  color: #7F8C8D;
+}
+
+/* 今日锦囊 */
+.tip-box {
+  background: #FAFAFA;
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 3px solid #27AE60;
+}
+
+.tip-label {
+  font-size: 11px;
+  color: #27AE60;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.tip-text {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* ========== 侧边栏导航 ========== */
+.nav-sidebar {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.nav-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+  font-size: 15px;
+  text-align: left;
+}
+
+.nav-sidebar-item:last-child {
+  margin-bottom: 0;
+}
+
+.nav-sidebar-item:hover {
+  background: #F8F8F8;
+}
+
+.nav-sidebar-item.active {
+  background: #FFF5F0;
+  color: #E8734A;
+}
+
+.nav-sidebar-item .nav-icon {
+  font-size: 20px;
+}
