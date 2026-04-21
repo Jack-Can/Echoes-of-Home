@@ -47,6 +47,10 @@ let lightboxImages = [];
 let lightboxIndex = 0;
 let voiceRecorder = null;
 let voiceRecordBtn = null;
+let attachInput = null;
+let parentAttachInput = null;
+let attachConfirmModal = null;
+let pendingAttachFile = null;
 
 // ========== 初始化 ==========
 function init() {
@@ -60,6 +64,7 @@ function init() {
   switchIdentity(CURRENT_USER);
   renderChatHistory();
   bindEvents();
+  createAttachConfirmModal();
 }
 
 function getCurrentRole() {
@@ -145,8 +150,82 @@ function bindEvents() {
     if (e.key === 'Escape') {
       closeLetterViewer();
       closeLetterComposer();
+      closeAttachConfirm();
     }
   });
+
+  attachInput = document.getElementById('attachInput');
+  parentAttachInput = document.getElementById('parentAttachInput');
+
+  if (attachInput) {
+    attachInput.addEventListener('change', (e) => handleAttachFileSelect(e, 'child'));
+  }
+  if (parentAttachInput) {
+    parentAttachInput.addEventListener('change', (e) => handleAttachFileSelect(e, 'parent'));
+  }
+
+  const childAttachBtn = document.getElementById('attachBtnChild');
+  const parentAttachBtn = document.getElementById('attachBtnParent');
+  if (childAttachBtn) {
+    childAttachBtn.addEventListener('click', () => triggerAttachPick('attachInput'));
+  }
+  if (parentAttachBtn) {
+    parentAttachBtn.addEventListener('click', () => triggerAttachPick('parentAttachInput'));
+  }
+}
+
+// ========== 温情检测与提示 ==========
+const chatWarmthCache = new Map();
+
+async function detectAndShowWarmthHint(msgId, content, from) {
+  if (!content || chatWarmthCache.has(msgId)) return;
+  
+  try {
+    const direction = from === 'me' ? 'parent' : 'child';
+    const result = await analyzeEmotion(content, direction);
+    
+    if (result.warmthPotential) {
+      const hint = document.querySelector(`.msg-warmth-hint[data-msg-id="${msgId}"]`);
+      if (hint) {
+        hint.classList.remove('hidden');
+        hint.classList.add('active');
+        hint.textContent = '✨';
+        hint.title = 'AI检测到温情时刻';
+        hint.onclick = function() { showWarmthMarkHint(msgId); };
+      }
+    }
+    
+    chatWarmthCache.set(msgId, result.warmthPotential);
+  } catch (e) {
+    // 检测失败，静默忽略
+    chatWarmthCache.set(msgId, false);
+  }
+}
+
+function showWarmthMarkHint(msgId) {
+  const tags = ['思念', '叮嘱', '开心', '牵挂', '感恩', '陪伴'];
+  
+  // 尝试自动推荐
+  const content = document.querySelector(`.msg-wrap[data-id="${msgId}"] .msg-chat`)?.textContent || '';
+  let autoTag = '牵挂';
+  
+  if (content.includes('想') || content.includes('想念')) autoTag = '思念';
+  else if (content.includes('注意') || content.includes('小心')) autoTag = '叮嘱';
+  else if (content.includes('开心') || content.includes('哈哈')) autoTag = '开心';
+  else if (content.includes('谢谢') || content.includes('感恩')) autoTag = '感恩';
+  else if (content.includes('一起') || content.includes('陪伴')) autoTag = '陪伴';
+  
+  const tag = prompt('选择温情标签: ' + tags.join(', ') + '\n\n推荐: ' + autoTag, autoTag);
+  if (tag && tags.includes(tag)) {
+    // 标记成功
+    const hint = document.querySelector(`.msg-warmth-hint[data-msg-id="${msgId}"]`);
+    if (hint) {
+      hint.classList.remove('active');
+      hint.classList.add('marked');
+      hint.textContent = '❤️';
+    }
+    alert('已标记为 #' + tag + ' ❤️');
+  }
 }
 
 // ========== 渲染模拟历史 ==========
@@ -198,6 +277,18 @@ function createMsgElement(msg) {
 
     wrap.appendChild(meta);
     wrap.appendChild(bubble);
+
+    // 添加温情提示占位符（异步检测后填充）
+    const warmthHint = document.createElement('span');
+    warmthHint.className = 'msg-warmth-hint hidden';
+    warmthHint.dataset.msgId = msg.id;
+    warmthHint.dataset.content = msg.content;
+    wrap.appendChild(warmthHint);
+
+    // 异步检测温情并更新UI
+    if (msg.type === 'chat' && msg.content) {
+      detectAndShowWarmthHint(msg.id, msg.content, msg.from);
+    }
 
     if (msg.emotionalContext && msg.from !== 'me') {
       const ctx = msg.emotionalContext;
@@ -323,6 +414,38 @@ function createMsgElement(msg) {
     return wrap;
   }
 
+  if (msg.type === 'attach') {
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar';
+    avatar.textContent = getAvatarByRole(getRoleByFrom(msg.from));
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-attach';
+
+    if (msg.images && msg.images.length > 0 && msg.images[0].src && msg.images[0].src.startsWith('data:image')) {
+      bubble.innerHTML = `
+        <img class="attach-preview-img" src="${msg.images[0].src}" onclick="openImageLightboxSingle('${msg.images[0].src}')" alt="附件图片">
+      `;
+    } else {
+      bubble.innerHTML = '<span class="attach-icon">📎</span>' + htmlEscape(msg.content);
+    }
+
+    meta.appendChild(avatar);
+    if (msg.from === 'them') {
+      const sender = document.createElement('div');
+      sender.className = 'msg-sender';
+      sender.textContent = msg.sender || getNameByRole(getRoleByFrom('them'));
+      meta.appendChild(sender);
+    }
+
+    wrap.appendChild(meta);
+    wrap.appendChild(bubble);
+    return wrap;
+  }
+
   return null;
 }
 
@@ -416,13 +539,13 @@ function sendMessageParent() {
 }
 
 // ========== 追加元素到聊天流 ==========
-function appendChatBubble(from, content) {
+function appendChatBubble(from, content, msgType = 'chat', fileName = '') {
   const senderRole = from === 'me' ? getCurrentRole() : getOppositeRole(getCurrentRole());
   const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
   const entry = {
     id: 'msg-' + Date.now(),
-    type: 'chat',
+    type: msgType,
     senderRole,
     sender: getNameByRole(senderRole),
     content: content,
@@ -430,25 +553,30 @@ function appendChatBubble(from, content) {
     timestamp
   };
 
-  const oppositeRole = from === 'me' ? 'parent' : 'child';
-  const emotionResult = analyzeEmotionSync(content, oppositeRole);
-  entry.emotionalContext = {
-    emotionType: emotionResult.emotionType,
-    emotionTag: emotionResult.emotionTag,
-    forChild: from === 'me' ? null : { interpreted: emotionResult.interpreted, suggestion: emotionResult.suggestion },
-    forParent: from === 'me' ? { interpreted: emotionResult.interpreted, suggestion: emotionResult.suggestion } : null
-  };
+  if (msgType === 'attach') {
+    entry.images = [{ src: content, name: fileName }];
+  } else {
+    const oppositeRole = from === 'me' ? 'parent' : 'child';
+    const emotionResult = analyzeEmotionSync(content, oppositeRole);
+    entry.emotionalContext = {
+      emotionType: emotionResult.emotionType,
+      emotionTag: emotionResult.emotionTag,
+      forChild: from === 'me' ? null : { interpreted: emotionResult.interpreted, suggestion: emotionResult.suggestion },
+      forParent: from === 'me' ? { interpreted: emotionResult.interpreted, suggestion: emotionResult.suggestion } : null
+    };
+  }
 
   CHAT_TIMELINE.push(entry);
 
   const msg = {
     id: entry.id,
-    type: 'chat',
+    type: msgType,
     from,
     sender: entry.sender,
     content: content,
+    images: entry.images,
     timestamp,
-    emotionalContext: entry.emotionalContext
+    fileName: fileName
   };
   const el = createMsgElement(msg);
   if (el) {
@@ -1159,6 +1287,10 @@ function openImageLightbox(images, index) {
   lightboxEl.classList.remove('hidden');
 }
 
+function openImageLightboxSingle(src) {
+  openImageLightbox([src], 0);
+}
+
 function showImageAt(index) {
   if (!lightboxImg) return;
   if (index < 0) index = lightboxImages.length - 1;
@@ -1198,6 +1330,57 @@ function jsEscape(str) {
     .replace(/'/g, "\\'")
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '');
+}
+
+// ========== 附件处理 ==========
+function triggerAttachPick(inputId) {
+  const input = document.getElementById(inputId);
+  if (input) input.click();
+}
+
+async function handleAttachFileSelect(event, mode) {
+  const files = event.target.files;
+  if (!files || !files.length) return;
+
+  for (const file of files) {
+    if (file.type.startsWith('image/')) {
+      pendingAttachFile = file;
+      showAttachConfirm(file);
+    } else {
+      alert('暂不支持该文件类型：' + file.name + '\n仅支持图片文件（jpg/png/gif等）');
+    }
+  }
+  event.target.value = '';
+}
+
+async function saveImageToAssets(file) {
+  if (!('showDirectoryHandle' in window)) {
+    return { success: false, message: '' };
+  }
+
+  try {
+    const root = await window.showDirectoryHandle('assets', { mode: 'readwrite' });
+    const imagesDir = await root.getDirectoryHandle('images', { create: true });
+    const fileHandle = await imagesDir.createWritable(file.name);
+    await fileHandle.write(file);
+    await fileHandle.close();
+    return { success: true, message: file.name };
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('保存失败:', err);
+      return { success: false, message: '' };
+    }
+    return { success: false, message: '' };
+  }
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 // ========== 辅助 ==========
@@ -1280,6 +1463,57 @@ function toggleVoicePlayback(btn, audioUrl) {
   playIcon.classList.add('hidden');
   pauseIcon.classList.remove('hidden');
   currentPlayingAudio = audio;
+}
+
+// ========== 附件确认弹窗 ==========
+function createAttachConfirmModal() {
+  attachConfirmModal = document.createElement('div');
+  attachConfirmModal.className = 'attach-confirm-modal hidden';
+  attachConfirmModal.innerHTML = `
+    <div class="attach-confirm-backdrop" onclick="closeAttachConfirm()"></div>
+    <div class="attach-confirm-dialog">
+      <div class="attach-confirm-title">确认发送附件</div>
+      <div class="attach-confirm-preview" id="attachConfirmPreview"></div>
+      <div class="attach-confirm-hint">是否保存到 assets/images 并发送？</div>
+      <div class="attach-confirm-btns">
+        <button class="attach-confirm-cancel" onclick="closeAttachConfirm()">取消</button>
+        <button class="attach-confirm-ok" onclick="confirmAttachSend()">确认</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(attachConfirmModal);
+}
+
+function showAttachConfirm(file) {
+  if (!attachConfirmModal) return;
+  const preview = document.getElementById('attachConfirmPreview');
+  if (preview) {
+    preview.innerHTML = '<span class="attach-file-icon">🖼️</span> ' + file.name;
+  }
+  attachConfirmModal.classList.remove('hidden');
+}
+
+function closeAttachConfirm() {
+  if (!attachConfirmModal) return;
+  attachConfirmModal.classList.add('hidden');
+  pendingAttachFile = null;
+}
+
+async function confirmAttachSend() {
+  if (!pendingAttachFile) return;
+
+  const base64 = await readFileAsDataURL(pendingAttachFile);
+  const saved = await saveImageToAssets(pendingAttachFile);
+
+  appendChatBubble('me', base64, 'attach', pendingAttachFile.name);
+
+  if (saved.success) {
+    alert('图片已保存到 assets/images/' + saved.message);
+  } else {
+    alert('图片已显示预览（请使用 Chrome/Edge 以保存到本地）');
+  }
+
+  closeAttachConfirm();
 }
 
 // ========== 启动 ==========

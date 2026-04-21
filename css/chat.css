@@ -99,6 +99,25 @@
   word-break: break-word;
 }
 
+.msg-warmth-hint {
+  display: inline-block;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  vertical-align: middle;
+}
+.msg-warmth-hint.active {
+  opacity: 1;
+}
+.msg-warmth-hint.hidden {
+  display: none;
+}
+.msg-warmth-hint.marked {
+  opacity: 0.7;
+}
+
 .msg-wrap.from-me .msg-chat {
   background: #D1F2D1;
   color: #1A1A1A;
@@ -1657,6 +1676,54 @@ body.letter-reading .main-area {
   font-size: 12px;
   opacity: 0.7;
   flex-shrink: 0;
+}
+
+/* ========== 附件消息气泡 ========== */
+.msg-attach {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  max-width: 280px;
+  background: #FFFFFF;
+  border: 1px solid #E8E8E8;
+  margin-left: 8px;
+}
+
+.from-me .msg-attach {
+  background: #D1F2D1;
+  color: white;
+  border: none;
+  margin-right: 8px;
+  margin-left: 0;
+}
+
+.attach-icon {
+  font-size: 20px;
+}
+
+.attach-preview-img {
+  width: 200px;
+  /* height: 150px; */
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+}
+
+.from-me .attach-preview-img {
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+
+body.elder-mode .msg-attach {
+  font-size: 16px;
+}
+
+body.elder-mode .attach-preview-img {
+  width: 240px;
+  /* height: 180px; */
 }
 
 .hidden {

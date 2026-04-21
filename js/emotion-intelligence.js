@@ -1,8 +1,8 @@
-// ========== 情感智能引擎 v2 ==========
-// 纯规则引擎方案，无需任何网络依赖
-// 包含：情感词典 + 中文分词 + 分类评分 + 翻译规则
+// ========== 情感智能引擎 v3 ==========
+// ML模型 + 规则引擎混合方案
+// 使用 transformers.js 本地模型进行情感分类，结合规则模板
 
-// ========== 情感词典（500+词汇，-10到+10评分） ==========
+// ========== 情感词典（用于规则分类） ==========
 const SENTIMENT_LEXICON = {
   // 强正面词 (+8 ~ +10)
   loveStrong: [
@@ -164,8 +164,8 @@ function tokenize(text) {
   return tokens;
 }
 
-// ========== 情感分类器 ==========
-function classifyEmotion(text) {
+// ========== 情感分类器（支持 ML 结果融合） ==========
+function classifyEmotion(text, mlResult = null) {
   const tokens = tokenize(text);
   let totalScore = 0;
   let count = 0;
@@ -187,30 +187,33 @@ function classifyEmotion(text) {
   });
 
   const avgScore = count > 0 ? totalScore / count : 0;
-  const scoreRange = maxScore - minScore;
 
   // 情绪类型判断
   let emotionType = 'neutral';
   let confidence = 0.5;
 
-  // 优先级判断
-  if (negativeCount > 0 && negativeCount >= careCount) {
-    if (containsAny(text, SENTIMENT_LEXICON.fatigue)) {
-      emotionType = 'fatigue';
-    } else if (containsAny(text, SENTIMENT_LEXICON.stress)) {
-      emotionType = 'stress';
-    } else if (avgScore < -3) {
+  // 优先级判断 - 疲劳类优先检测
+  if (containsAny(text, SENTIMENT_LEXICON.fatigue)) {
+    emotionType = 'fatigue';
+    confidence = 0.85;
+  } else if (containsAny(text, SENTIMENT_LEXICON.stress)) {
+    emotionType = 'stress';
+    confidence = 0.85;
+  } else if (containsAny(text, SENTIMENT_LEXICON.sadness)) {
+    emotionType = 'stress';
+    confidence = 0.75;
+  } else if (negativeCount > 0 && negativeCount >= careCount) {
+    if (avgScore < -3) {
       emotionType = 'worry';
-    } else if (containsAny(text, SENTIMENT_LEXICON.sadness)) {
-      emotionType = 'stress';
+      confidence = 0.7;
     } else {
       emotionType = 'worry';
+      confidence = 0.6;
     }
-    confidence = Math.min(0.95, 0.6 + (Math.abs(avgScore) / 10) * 0.3 + (negativeCount / tokens.length) * 0.2);
   } else if (careCount > 0 || avgScore > 0) {
     if (containsAny(text, SENTIMENT_LEXICON.missing)) {
       emotionType = 'care';
-      confidence = 0.85;
+      confidence = 0.9;
     } else if (containsAny(text, SENTIMENT_LEXICON.loveStrong)) {
       emotionType = 'care';
       confidence = 0.9;
@@ -231,6 +234,14 @@ function classifyEmotion(text) {
     if (containsAny(text, ['怎么办', '怎么办啊', '好烦', '不开心', '难过', '沮丧', '想哭', '扛不住'])) {
       emotionType = 'seeking';
       confidence = 0.8;
+    }
+  }
+
+  // ML结果融合：如果 ML 检测到正向情感且分数很高，强化 care 类型
+  if (mlResult && mlResult.label === 'positive' && mlResult.positiveScore > 0.8) {
+    if (emotionType === 'neutral' || emotionType === 'care') {
+      emotionType = 'care';
+      confidence = Math.max(confidence, mlResult.positiveScore);
     }
   }
 
@@ -386,7 +397,7 @@ function translateForParent(text, emotionType) {
   return rules.default;
 }
 
-// ========== 主函数：同步分析情感 ==========
+// ========== 主函数：同步分析情感（规则引擎） ==========
 function analyzeEmotionSync(text, direction) {
   const { emotionType, confidence } = classifyEmotion(text);
 
@@ -402,16 +413,58 @@ function analyzeEmotionSync(text, direction) {
     emotionTag: EMOTION_TAG_MAP[emotionType] || '日常',
     confidence: confidence,
     interpreted: translation.interpreted,
-    suggestion: translation.suggestion
+    suggestion: translation.suggestion,
+    warmthPotential: false,
+    mlResult: null
   };
 }
 
-// ========== 异步版本（预留，未来可接入ML模型） ==========
+// ========== 异步版本：ML模型 + 规则引擎混合 ==========
 async function analyzeEmotion(text, direction) {
-  return analyzeEmotionSync(text, direction);
+  let mlResult = null;
+  let warmthPotential = false;
+
+  // 调用 ML 模型获取情感分析结果
+  try {
+    if (typeof analyzeSentiment === 'function') {
+      mlResult = await analyzeSentiment(text);
+      
+      // 温情检测：positive score > 0.7
+      if (mlResult && mlResult.positiveScore > 0.7) {
+        warmthPotential = true;
+      }
+    }
+  } catch (e) {
+    console.warn('ML情感分析失败，使用规则引擎:', e);
+  }
+
+  // 使用规则引擎进行6分类
+  const { emotionType, confidence } = classifyEmotion(text, mlResult);
+
+  let translation;
+  if (direction === 'child') {
+    translation = translateForChild(text, emotionType);
+  } else {
+    translation = translateForParent(text, emotionType);
+  }
+
+  return {
+    emotionType,
+    emotionTag: EMOTION_TAG_MAP[emotionType] || '日常',
+    confidence: confidence,
+    interpreted: translation.interpreted,
+    suggestion: translation.suggestion,
+    warmthPotential: warmthPotential,
+    mlResult: mlResult
+  };
 }
 
 // ========== 便捷调用：分析并返回完整结果 ==========
 function analyze(text, direction) {
   return analyzeEmotionSync(text, direction);
+}
+
+// ========== 异步便捷调用 ==========
+async function analyzeAsync(text, direction) {
+  return analyzeEmotion(text, direction);
 }
