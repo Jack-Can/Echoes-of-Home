@@ -118,6 +118,43 @@
   transform: scale(0.98);
 }
 
+.voice-btn.recording {
+  background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%) !important;
+  animation: voicePulse 1s infinite;
+}
+
+.voice-btn.recording .btn-label {
+  display: none;
+}
+
+.voice-btn.recording .btn-recording-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.voice-btn .btn-recording-indicator {
+  display: none;
+}
+
+@keyframes voicePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 6px 25px rgba(231, 76, 60, 0.5); }
+}
+
+.voice-recording-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* 父母端输入模式切换 Tab */
 .parent-mode-tabs {
   display: flex;
@@ -158,4 +195,25 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+}
+
+/* ========== 父母端字体放大 (+15%) ========== */
+body.elder-mode .text-input {
+  font-size: 17px;
+}
+
+body.elder-mode .parent-mode-tab {
+  font-size: 15px;
+}
+
+body.elder-mode .voice-btn {
+  font-size: 17px;
+}
+
+body.elder-mode .letter-btn {
+  font-size: 15px;
+}
+
+body.elder-mode .attach-btn {
+  font-size: 22px;
 }

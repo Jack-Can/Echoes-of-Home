@@ -38,14 +38,26 @@ let composePacked = false;
 let composeSealing = false;
 let emotionOverlay = null;
 let emotionPreviewText = null;
+let lightboxEl = null;
+let lightboxImg = null;
+let lightboxPrev = null;
+let lightboxNext = null;
+let lightboxCounter = null;
+let lightboxImages = [];
+let lightboxIndex = 0;
+let voiceRecorder = null;
+let voiceRecordBtn = null;
 
 // ========== 初始化 ==========
 function init() {
   setupLetterComposer();
   setupEmotionModal();
   setupLetterViewer();
+  setupImageLightbox();
+  setupVoiceRecorder();
   initChatTimeline();
   updateHeaderByIdentity();
+  switchIdentity(CURRENT_USER);
   renderChatHistory();
   bindEvents();
 }
@@ -69,17 +81,18 @@ function initChatTimeline() {
   CHAT_TIMELINE = MOCK_CHAT_HISTORY
     .filter((msg) => msg.type !== 'buffer')
     .map((msg) => {
-    const senderRole = msg.from === 'me' ? 'child' : 'parent';
-    return {
-      id: msg.id,
-      type: msg.type,
-      senderRole,
-      sender: getNameByRole(senderRole),
-      content: msg.content || '',
-      images: Array.isArray(msg.images) ? msg.images.slice() : [],
-      timestamp: msg.timestamp || ''
-    };
-  });
+      const senderRole = msg.from === 'me' ? 'child' : 'parent';
+      return {
+        id: msg.id,
+        type: msg.type,
+        senderRole,
+        sender: getNameByRole(senderRole),
+        content: msg.content || '',
+        images: Array.isArray(msg.images) ? msg.images.slice() : [],
+        timestamp: msg.timestamp || '',
+        emotionalContext: msg.emotionalContext || null
+      };
+    });
 }
 
 function resolveEntryForCurrentUser(entry) {
@@ -91,7 +104,8 @@ function resolveEntryForCurrentUser(entry) {
     sender: entry.sender || getNameByRole(entry.senderRole),
     content: entry.content || '',
     images: Array.isArray(entry.images) ? entry.images.slice() : [],
-    timestamp: entry.timestamp || ''
+    timestamp: entry.timestamp || '',
+    emotionalContext: entry.emotionalContext || null
   };
 }
 
@@ -184,6 +198,28 @@ function createMsgElement(msg) {
 
     wrap.appendChild(meta);
     wrap.appendChild(bubble);
+
+    if (msg.emotionalContext && msg.from !== 'me') {
+      const ctx = msg.emotionalContext;
+      const dir = CURRENT_USER === 'child' ? 'child' : 'parent';
+      const res = dir === 'child' ? ctx.forChild : ctx.forParent;
+      if (res) {
+        const ctxEl = document.createElement('div');
+        ctxEl.className = 'emotion-ctx';
+        ctxEl.innerHTML = `
+          <div class="emotion-ctx-ori">
+            <div class="emotion-ctx-tag">💡 ${ctx.emotionTag || '日常'}</div>
+            <div class="emotion-ctx-orig-text">${msg.content}</div>
+          </div>
+          <div class="emotion-ctx-res">
+            <div class="emotion-ctx-inte">${res.interpreted || ''}</div>
+            ${res.suggestion ? `<div class="emotion-ctx-sug">${res.suggestion}</div>` : ''}
+          </div>
+        `;
+        wrap.appendChild(ctxEl);
+      }
+    }
+
     return wrap;
   }
 
@@ -209,39 +245,20 @@ function createMsgElement(msg) {
     card.onclick = () => openLetterFromCard(card);
 
     const letterPreview = getLetterPreview(msg.content || '');
-    const currentUserName = getNameByRole(getCurrentRole());
     const targetName = card.dataset.sender;
+    const recipientName = CURRENT_USER === 'child' ? '老妈' : '孩子';
 
     card.innerHTML = `
-      <div class="envelope-shell">
-        <div class="envelope-paper-peek"></div>
-        <div class="envelope-lining"></div>
-        <div class="envelope-top"></div>
-        <div class="envelope-address">
-          <div class="envelope-address-label">FROM</div>
-          <div class="envelope-address-name">${isIncomingLetter ? targetName : currentUserName}</div>
-          <div class="envelope-address-route">TO ${isIncomingLetter ? currentUserName : targetName}</div>
-        </div>
-        <div class="envelope-stamp-mark">AIR MAIL</div>
-        <div class="envelope-front">
-          <div class="envelope-front-inner">
-            <div class="envelope-tag">家书</div>
-            <div class="envelope-kicker">${isIncomingLetter ? '寄给你的信件' : '你寄出的信件'}</div>
-            <div class="envelope-recipient-label">${isIncomingLetter ? '发信人' : '收信人'}</div>
-            <div class="envelope-recipient-name">${targetName}</div>
-            <div class="envelope-divider"></div>
-            <div class="envelope-preview-label">信封摘要</div>
-            <div class="envelope-preview">${letterPreview}</div>
-            <div class="envelope-meta-row">
-              <div class="envelope-time">${msg.timestamp || ''}</div>
-              <div class="envelope-status">${isIncomingLetter ? '已送达，可拆阅' : '已送达，可重读'}</div>
-            </div>
-          </div>
-          <div class="envelope-postmark">${msg.timestamp || '刚刚封缄'}</div>
+      <div class="envelope-body">
+        <div class="envelope-flap"></div>
+        <div class="envelope-content">
+          <div class="envelope-type-badge">${msg.letterType || '家书'}</div>
+          <div class="envelope-sender">${isIncomingLetter ? '来自 ' + targetName : '发给 ' + recipientName}</div>
+          <div class="envelope-time">${msg.timestamp || ''}</div>
         </div>
         <div class="envelope-seal"></div>
       </div>
-      <div class="envelope-hint">${isIncomingLetter ? '这封家书已经送达，点击信封拆阅' : '这封家书已经妥投，点击信封重读'}</div>
+      <div class="envelope-hint">${isIncomingLetter ? '点击拆阅信件' : '点击重读信件'}</div>
     `;
 
     meta.appendChild(avatar);
@@ -254,6 +271,55 @@ function createMsgElement(msg) {
 
     wrap.appendChild(meta);
     wrap.appendChild(card);
+    return wrap;
+  }
+
+  if (msg.type === 'voice') {
+    wrap.classList.add('msg-voice-wrap');
+
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar';
+    avatar.textContent = getAvatarByRole(getRoleByFrom(msg.from));
+
+    const isIncoming = msg.from === 'them';
+    const duration = msg.duration || 0;
+
+    const bubble = document.createElement('div');
+    bubble.className = `msg-voice-bubble ${isIncoming ? 'incoming' : 'outgoing'}`;
+
+    const durationText = duration >= 60
+      ? `${Math.floor(duration / 60)}:${String(duration % 60).padStart(2, '0')}`
+      : `${duration}"`;
+
+    bubble.innerHTML = `
+      <div class="voice-play-btn" onclick="toggleVoicePlayback(this, '${msg.content}')">
+        <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <svg class="pause-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+        </svg>
+      </div>
+      <div class="voice-wave">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="voice-duration">${durationText}</div>
+    `;
+
+    meta.appendChild(avatar);
+    if (!isIncoming) {
+      const sender = document.createElement('div');
+      sender.className = 'msg-sender';
+      sender.textContent = msg.sender || getNameByRole(getRoleByFrom('them'));
+      meta.appendChild(sender);
+    }
+
+    wrap.appendChild(meta);
+    wrap.appendChild(bubble);
     return wrap;
   }
 
@@ -279,12 +345,13 @@ function switchIdentity(identity) {
     btnParent.classList.remove('active');
     inputChat.classList.remove('hidden');
     inputVoice.classList.add('hidden');
+    document.body.classList.remove('elder-mode');
   } else {
     btnChild.classList.remove('active');
     btnParent.classList.add('active');
     inputChat.classList.add('hidden');
     inputVoice.classList.remove('hidden');
-    // 重置父母端为语音模式
+    document.body.classList.add('elder-mode');
     switchParentInput('voice');
   }
 
@@ -362,6 +429,16 @@ function appendChatBubble(from, content) {
     images: [],
     timestamp
   };
+
+  const oppositeRole = from === 'me' ? 'parent' : 'child';
+  const emotionResult = analyzeEmotionSync(content, oppositeRole);
+  entry.emotionalContext = {
+    emotionType: emotionResult.emotionType,
+    emotionTag: emotionResult.emotionTag,
+    forChild: from === 'me' ? null : { interpreted: emotionResult.interpreted, suggestion: emotionResult.suggestion },
+    forParent: from === 'me' ? { interpreted: emotionResult.interpreted, suggestion: emotionResult.suggestion } : null
+  };
+
   CHAT_TIMELINE.push(entry);
 
   const msg = {
@@ -370,7 +447,8 @@ function appendChatBubble(from, content) {
     from,
     sender: entry.sender,
     content: content,
-    timestamp
+    timestamp,
+    emotionalContext: entry.emotionalContext
   };
   const el = createMsgElement(msg);
   if (el) {
@@ -767,7 +845,6 @@ function setupLetterViewer() {
             </div>
           </div>
           <div class="open-envelope-front"></div>
-          <div class="open-envelope-flap"></div>
           <div class="open-envelope-seal"></div>
         </div>
       </div>
@@ -807,6 +884,10 @@ function openLetterViewer(letter) {
       const img = document.createElement('img');
       img.src = src;
       img.alt = `家书图片${index + 1}`;
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', () => {
+        openImageLightbox(letter.images || [], index);
+      });
       letterPaperImages.appendChild(img);
     });
   }
@@ -832,6 +913,274 @@ function closeLetterViewer() {
     }
     document.body.classList.remove('letter-reading');
   }, 800);
+}
+
+// ========== 图片放大 ==========
+function setupImageLightbox() {
+  lightboxEl = document.getElementById('imageLightbox');
+  lightboxImg = document.getElementById('lightboxImg');
+  lightboxPrev = document.getElementById('lightboxPrev');
+  lightboxNext = document.getElementById('lightboxNext');
+  lightboxCounter = document.getElementById('lightboxCounter');
+  const closeBtn = document.getElementById('lightboxClose');
+  const backdrop = document.getElementById('lightboxBackdrop');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeImageLightbox);
+  }
+  if (backdrop) {
+    backdrop.addEventListener('click', closeImageLightbox);
+  }
+  if (lightboxPrev) {
+    lightboxPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showImageAt(lightboxIndex - 1);
+    });
+  }
+  if (lightboxNext) {
+    lightboxNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showImageAt(lightboxIndex + 1);
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (!lightboxEl || lightboxEl.classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeImageLightbox();
+    if (e.key === 'ArrowLeft') showImageAt(lightboxIndex - 1);
+    if (e.key === 'ArrowRight') showImageAt(lightboxIndex + 1);
+  });
+}
+
+// ========== 语音录制 ==========
+class VoiceRecorder {
+  constructor() {
+    this.mediaRecorder = null;
+    this.chunks = [];
+    this.stream = null;
+    this.isRecording = false;
+    this.mimeType = '';
+  }
+
+  async init() {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 16000
+        }
+      });
+      this.mimeType = this.getSupportedMimeType();
+      this.mediaRecorder = new MediaRecorder(this.stream, { mimeType: this.mimeType });
+
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          this.chunks.push(e.data);
+        }
+      };
+
+      return true;
+    } catch (err) {
+      console.error('[VoiceRecorder] init failed:', err);
+      return false;
+    }
+  }
+
+  getSupportedMimeType() {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/wav'
+    ];
+    for (const t of types) {
+      if (MediaRecorder.isTypeSupported(t)) return t;
+    }
+    return 'audio/webm';
+  }
+
+  start() {
+    if (!this.mediaRecorder || this.isRecording) return;
+    this.chunks = [];
+    this.mediaRecorder.start(100);
+    this.isRecording = true;
+  }
+
+  stop() {
+    return new Promise((resolve) => {
+      if (!this.mediaRecorder || !this.isRecording) {
+        resolve(null);
+        return;
+      }
+
+      this.mediaRecorder.onstop = () => {
+        if (this.stream) {
+          this.stream.getTracks().forEach(track => track.stop());
+          this.stream = null;
+        }
+        this.isRecording = false;
+
+        if (this.chunks.length === 0) {
+          resolve(null);
+          return;
+        }
+
+        const blob = new Blob(this.chunks, { type: this.mimeType });
+        this.chunks = [];
+        resolve(blob);
+      };
+
+      this.mediaRecorder.stop();
+    });
+  }
+
+  getDuration() {
+    if (!this.mediaRecorder || this.chunks.length === 0) return 0;
+    return Math.round(this.chunks.reduce((acc, c) => acc + c.size, 0) / (16000 * 2));
+  }
+}
+
+let voiceRecorderInstance = null;
+let voiceRecordStartTime = 0;
+let voicePermissionGranted = false;
+
+async function setupVoiceRecorder() {
+  const voiceRecordBtn = document.getElementById('voiceRecordBtn');
+  if (!voiceRecordBtn) return;
+
+  const ensureRecorder = async () => {
+    if (!voiceRecorderInstance) {
+      voiceRecorderInstance = new VoiceRecorder();
+    }
+    if (!voicePermissionGranted) {
+      const ok = await voiceRecorderInstance.init();
+      if (!ok) {
+        console.warn('[VoiceRecorder] permission denied');
+        voiceRecordBtn.disabled = true;
+        return false;
+      }
+      voicePermissionGranted = true;
+    }
+    return true;
+  };
+
+  const startRecording = async () => {
+    const ready = await ensureRecorder();
+    if (!ready) return;
+    voiceRecorderInstance.start();
+    voiceRecordStartTime = Date.now();
+    voiceRecordBtn.classList.add('recording');
+  };
+
+  const stopRecording = async () => {
+    if (!voiceRecorderInstance || !voiceRecordBtn.classList.contains('recording')) return;
+
+    const duration = Date.now() - voiceRecordStartTime;
+    voiceRecordBtn.classList.remove('recording');
+
+    const blob = await voiceRecorderInstance.stop();
+    if (!blob || blob.size === 0) return;
+
+    const audioUrl = URL.createObjectURL(blob);
+    const audioDuration = Math.max(1, Math.round(duration / 1000));
+
+    appendVoiceMessage(audioUrl, audioDuration, blob);
+  };
+
+  voiceRecordBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startRecording();
+  });
+  voiceRecordBtn.addEventListener('mouseup', stopRecording);
+  voiceRecordBtn.addEventListener('mouseleave', () => {
+    if (voiceRecordBtn.classList.contains('recording')) {
+      stopRecording();
+    }
+  });
+  voiceRecordBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startRecording();
+  });
+  voiceRecordBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    stopRecording();
+  });
+}
+
+function appendVoiceMessage(audioUrl, duration, blob) {
+  const from = 'me';
+  const senderRole = 'parent';
+  const sender = '老妈';
+  const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const id = 'voice-' + Date.now();
+
+  const emotionResult = analyzeEmotionSync('语音消息', 'child');
+  const entry = {
+    id,
+    type: 'voice',
+    senderRole,
+    sender,
+    content: audioUrl,
+    duration,
+    timestamp,
+    emotionalContext: {
+      emotionType: emotionResult.emotionType,
+      emotionTag: emotionResult.emotionTag,
+      forChild: { interpreted: emotionResult.interpreted, suggestion: '' },
+      forParent: null
+    }
+  };
+
+  CHAT_TIMELINE.push(entry);
+
+  const msg = {
+    id,
+    type: 'voice',
+    from,
+    sender,
+    content: audioUrl,
+    duration,
+    timestamp,
+    emotionalContext: entry.emotionalContext
+  };
+
+  const el = createMsgElement(msg);
+  if (el) {
+    chatStream.appendChild(el);
+    chatStream.scrollTop = chatStream.scrollHeight;
+  }
+}
+
+function openImageLightbox(images, index) {
+  if (!lightboxEl) return;
+  lightboxImages = images || [];
+  lightboxIndex = index || 0;
+  showImageAt(lightboxIndex);
+  lightboxEl.classList.remove('hidden');
+}
+
+function showImageAt(index) {
+  if (!lightboxImg) return;
+  if (index < 0) index = lightboxImages.length - 1;
+  if (index >= lightboxImages.length) index = 0;
+  lightboxIndex = index;
+  lightboxImg.src = lightboxImages[index] || '';
+  lightboxImg.alt = `图片 ${index + 1}`;
+  if (lightboxPrev) lightboxPrev.classList.toggle('hidden', lightboxImages.length <= 1);
+  if (lightboxNext) lightboxNext.classList.toggle('hidden', lightboxImages.length <= 1);
+  if (lightboxCounter) {
+    if (lightboxImages.length > 1) {
+      lightboxCounter.textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+      lightboxCounter.classList.remove('hidden');
+    } else {
+      lightboxCounter.classList.add('hidden');
+    }
+  }
+}
+
+function closeImageLightbox() {
+  if (!lightboxEl) return;
+  lightboxEl.classList.add('hidden');
 }
 
 function htmlEscape(str) {
@@ -884,6 +1233,53 @@ function switchView(view) {
       CalendarApp.render.init();
     }
   }
+}
+
+// ========== 语音播放 ==========
+let currentPlayingAudio = null;
+
+function toggleVoicePlayback(btn, audioUrl) {
+  const playIcon = btn.querySelector('.play-icon');
+  const pauseIcon = btn.querySelector('.pause-icon');
+
+  if (currentPlayingAudio && currentPlayingAudio.src === audioUrl) {
+    if (currentPlayingAudio.paused) {
+      currentPlayingAudio.play();
+      playIcon.classList.add('hidden');
+      pauseIcon.classList.remove('hidden');
+    } else {
+      currentPlayingAudio.pause();
+      playIcon.classList.remove('hidden');
+      pauseIcon.classList.add('hidden');
+    }
+    return;
+  }
+
+  if (currentPlayingAudio) {
+    currentPlayingAudio.pause();
+    currentPlayingAudio = null;
+    document.querySelectorAll('.voice-play-btn').forEach(b => {
+      b.querySelector('.play-icon').classList.remove('hidden');
+      b.querySelector('.pause-icon').classList.add('hidden');
+    });
+  }
+
+  const audio = new Audio(audioUrl);
+  audio.onended = () => {
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+    currentPlayingAudio = null;
+  };
+  audio.onerror = () => {
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+    currentPlayingAudio = null;
+  };
+
+  audio.play();
+  playIcon.classList.add('hidden');
+  pauseIcon.classList.remove('hidden');
+  currentPlayingAudio = audio;
 }
 
 // ========== 启动 ==========
