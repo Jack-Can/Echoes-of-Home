@@ -24,6 +24,7 @@ let letterScene = null;
 let letterPaperContent = null;
 let letterPaperMeta = null;
 let letterPaperImages = null;
+let openPaperBody = null;
 let composerOverlay = null;
 let composerPanel = null;
 let composeTextInput = null;
@@ -966,6 +967,7 @@ function setupLetterViewer() {
           <div class="open-paper" id="openPaper">
             <div class="open-paper-fold"></div>
             <div class="open-paper-body">
+              <div class="open-paper-seal"></div>
               <div class="open-paper-header">家书</div>
               <div class="open-paper-meta" id="openPaperMeta"></div>
               <div class="open-paper-content" id="openPaperContent"></div>
@@ -985,6 +987,7 @@ function setupLetterViewer() {
   letterPaperContent = document.getElementById('openPaperContent');
   letterPaperMeta = document.getElementById('openPaperMeta');
   letterPaperImages = document.getElementById('openPaperImages');
+  openPaperBody = document.querySelector('.open-paper-body');
 }
 
 function openLetterFromCard(card) {
@@ -1020,6 +1023,12 @@ function openLetterViewer(letter) {
     });
   }
 
+  const paperStyles = ['paper-craft', 'paper-modern', 'paper-ink', 'paper-cream'];
+  if (openPaperBody) {
+    openPaperBody.classList.remove(...paperStyles);
+    openPaperBody.classList.add(paperStyles[Math.floor(Math.random() * paperStyles.length)]);
+  }
+
   letterOverlay.classList.remove('hidden');
   document.body.classList.add('letter-reading');
 
@@ -1039,8 +1048,11 @@ function closeLetterViewer() {
     if (letterScene) {
       letterScene.classList.remove('play');
     }
+    if (openPaperBody) {
+      openPaperBody.classList.remove('paper-craft', 'paper-modern', 'paper-ink', 'paper-cream');
+    }
     document.body.classList.remove('letter-reading');
-  }, 800);
+  }, 900);
 }
 
 // ========== 图片放大 ==========

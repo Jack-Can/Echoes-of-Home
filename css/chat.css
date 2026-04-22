@@ -192,28 +192,71 @@
 /* ========== 信封家书卡片 ========== */
 /* ========== 信封卡片（现代简约风） ========== */
 .msg-envelope-card {
-  width: min(380px, 52%);
+  width: min(330px, 52%);
   cursor: pointer;
   user-select: none;
   transition: transform 0.22s ease;
+  animation: envelopeSlideIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@keyframes envelopeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 .msg-envelope-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
 }
 
 .envelope-body {
   position: relative;
-  height: 140px;
-  background: #FFFFFF;
+  height: 145px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.9) 0%, transparent 50%),
+    linear-gradient(180deg, #FEFEFE 0%, #F8F9FC 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 12px 32px rgba(91, 141, 239, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   overflow: hidden;
-  transition: box-shadow 0.22s ease;
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+/* 信封粘合分割线 */
+.envelope-body::before {
+  content: '';
+  position: absolute;
+  top: 58px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+  z-index: 1;
+}
+
+/* 右下角邮戳装饰 */
+.envelope-body::after {
+  content: '✉';
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-size: 20px;
+  opacity: 0.1;
+  transform: rotate(-12deg);
+  z-index: 0;
 }
 
 .msg-envelope-card:hover .envelope-body {
-  box-shadow: 0 8px 28px rgba(91, 141, 239, 0.12);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 16px 40px rgba(91, 141, 239, 0.16);
 }
 
 .envelope-flap {
@@ -222,8 +265,15 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background: linear-gradient(180deg, #DBEAFE 0%, #BFDBFE 100%);
+  background: linear-gradient(180deg, #D6E8FF 0%, #C2DDF8 100%);
   clip-path: polygon(0 0, 50% 100%, 100% 0);
+  transition: clip-path 0.3s ease, transform 0.3s ease;
+  z-index: 1;
+}
+
+.msg-envelope-card:hover .envelope-flap {
+  clip-path: polygon(0 0, 50% 14%, 100% 0);
+  transform: translateY(-2px);
 }
 
 .envelope-content {
@@ -236,17 +286,19 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  z-index: 1;
 }
 
 .envelope-type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  padding: 4px 12px;
   background: #5B8DEF;
   color: #FFFFFF;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   border-radius: 999px;
+  letter-spacing: 0.3px;
 }
 
 .envelope-sender {
@@ -263,13 +315,15 @@
 .envelope-hint {
   margin-top: 12px;
   font-size: 12px;
-  color: #6B7280;
+  color: #5B8DEF;
   text-align: center;
-  padding: 6px 14px;
-  background: #F9FAFB;
+  padding: 6px 16px;
+  background: #EEF4FF;
   border-radius: 999px;
   display: inline-block;
   align-self: center;
+  font-weight: 500;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .msg-envelope-card.outgoing .envelope-type-badge {
@@ -278,6 +332,15 @@
 
 .msg-envelope-card.outgoing .envelope-flap {
   background: linear-gradient(180deg, #D1FAE5 0%, #A7F3D0 100%);
+}
+
+.msg-envelope-card.outgoing:hover .envelope-flap {
+  background: linear-gradient(180deg, #BFF0D8 0%, #9AE8C0 100%);
+}
+
+.msg-envelope-card.outgoing .envelope-hint {
+  background: #ECFDF5;
+  color: #10B981;
 }
 
 /* ========== 情绪缓冲拦截 ========== */
@@ -525,7 +588,12 @@ body.letter-composing .main-area {
 .compose-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(37, 28, 21, 0.36);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(37, 28, 21, 0.24) 0%,
+    rgba(37, 28, 21, 0.5) 100%
+  );
+  backdrop-filter: blur(6px);
 }
 
 .compose-panel {
@@ -1036,7 +1104,12 @@ body.letter-reading .main-area {
 .letter-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(25, 20, 16, 0.38);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(37, 28, 21, 0.22) 0%,
+    rgba(37, 28, 21, 0.56) 100%
+  );
+  backdrop-filter: blur(6px);
   pointer-events: auto;
   z-index: 1;
 }
@@ -1113,8 +1186,12 @@ body.letter-reading .main-area {
   width: 100%;
   height: 100%;
   border-radius: 20px;
-  background: #F8FAFC;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.95) 0%, transparent 55%),
+    linear-gradient(180deg, #FDFCFB 0%, #F2F1EF 100%);
+  box-shadow:
+    inset 0 4px 20px rgba(0,0,0,0.04),
+    0 4px 24px rgba(0, 0, 0, 0.08);
   z-index: 1;
   overflow: hidden;
 }
@@ -1124,7 +1201,13 @@ body.letter-reading .main-area {
   position: absolute;
   inset: 0;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, transparent 45%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 48px,
+      rgba(200, 190, 180, 0.04) 48px 49px
+    );
   pointer-events: none;
 }
 
@@ -1162,13 +1245,341 @@ body.letter-reading .main-area {
 .open-paper-body {
   top: 0;
   height: 100%;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   opacity: 0;
   transform: scale(0.9);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+/* ========== 样式1：牛皮纸经典 ========== */
+.paper-craft {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255,248,235,0.6) 0%, transparent 50%),
+    linear-gradient(180deg, #E8DCC8 0%, #D9C9B0 50%, #C9B896 100%);
+  box-shadow:
+    0 28px 70px rgba(160, 130, 90, 0.22),
+    0 14px 35px rgba(120, 90, 60, 0.15),
+    0 6px 16px rgba(80, 60, 40, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.06);
+}
+
+.paper-craft::before {
+  height: 8px;
+  background:
+    linear-gradient(90deg,
+      transparent 0%, transparent 2%,
+      rgba(120,90,60,0.12) 2.5%, transparent 3.5%,
+      transparent 6%, rgba(120,90,60,0.10) 6.5%, transparent 7.5%,
+      transparent 11%, rgba(120,90,60,0.14) 11.5%, transparent 12.5%,
+      transparent 17%, rgba(120,90,60,0.08) 17.5%, transparent 18.5%,
+      transparent 22%, rgba(120,90,60,0.12) 22.5%, transparent 23.5%,
+      transparent 27%, rgba(120,90,60,0.10) 27.5%, transparent 28.5%,
+      transparent 32%, rgba(120,90,60,0.13) 32.5%, transparent 33.5%,
+      transparent 37%, rgba(120,90,60,0.09) 37.5%, transparent 38.5%,
+      transparent 42%, rgba(120,90,60,0.11) 42.5%, transparent 43.5%,
+      transparent 47%, rgba(120,90,60,0.12) 47.5%, transparent 48.5%,
+      transparent 52%, rgba(120,90,60,0.10) 52.5%, transparent 53.5%,
+      transparent 57%, rgba(120,90,60,0.13) 57.5%, transparent 58.5%,
+      transparent 62%, rgba(120,90,60,0.08) 62.5%, transparent 63.5%,
+      transparent 67%, rgba(120,90,60,0.11) 67.5%, transparent 68.5%,
+      transparent 72%, rgba(120,90,60,0.12) 72.5%, transparent 73.5%,
+      transparent 77%, rgba(120,90,60,0.10) 77.5%, transparent 78.5%,
+      transparent 82%, rgba(120,90,60,0.13) 78.5%, transparent 79.5%,
+      transparent 83%, rgba(120,90,60,0.09) 83.5%, transparent 84.5%,
+      transparent 88%, rgba(120,90,60,0.11) 88.5%, transparent 89.5%,
+      transparent 93%, rgba(120,90,60,0.12) 93.5%, transparent 94.5%,
+      transparent 97%, rgba(120,90,60,0.08) 97.5%, transparent 98.5%
+    );
+}
+
+.paper-craft::after {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(140, 100, 60, 0.12) 15%,
+    rgba(140, 100, 60, 0.15) 50%,
+    rgba(140, 100, 60, 0.12) 85%,
+    transparent 95%
+  );
+}
+
+.paper-craft .open-paper-seal {
+  background: radial-gradient(circle at 40% 40%,
+    rgba(180, 90, 50, 0.35) 0%,
+    rgba(150, 70, 40, 0.25) 50%,
+    rgba(120, 50, 30, 0.15) 100%
+  );
+  border: 1.5px solid rgba(150, 80, 50, 0.30);
+}
+
+.paper-craft .open-paper-seal::before {
+  color: rgba(140, 60, 35, 0.55);
+}
+
+.paper-craft .open-paper-meta::after {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(150, 100, 60, 0.25) 20%,
+    rgba(150, 100, 60, 0.25) 80%,
+    transparent
+  );
+}
+
+/* ========== 样式2：淡雅现代 ========== */
+.paper-modern {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(255,255,255,1) 0%, transparent 50%),
+    linear-gradient(180deg, #FEFEFE 0%, #F5F7FA 60%, #EEF1F5 100%);
+  box-shadow:
+    0 24px 64px rgba(91, 141, 239, 0.10),
+    0 12px 32px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 8px rgba(255, 255, 255, 0.6);
+}
+
+.paper-modern::before {
+  height: 5px;
+  background:
+    linear-gradient(90deg,
+      transparent 0%, transparent 3%,
+      rgba(0,0,0,0.025) 3.5%, transparent 4%,
+      transparent 8%, rgba(0,0,0,0.02) 8.5%, transparent 9%,
+      transparent 14%, rgba(0,0,0,0.025) 14.5%, transparent 15%,
+      transparent 20%, rgba(0,0,0,0.02) 20.5%, transparent 21%,
+      transparent 26%, rgba(0,0,0,0.025) 26.5%, transparent 27%,
+      transparent 32%, rgba(0,0,0,0.02) 32.5%, transparent 33%,
+      transparent 38%, rgba(0,0,0,0.025) 38.5%, transparent 39%,
+      transparent 44%, rgba(0,0,0,0.02) 44.5%, transparent 45%,
+      transparent 50%, rgba(0,0,0,0.025) 50.5%, transparent 51%,
+      transparent 56%, rgba(0,0,0,0.02) 56.5%, transparent 57%,
+      transparent 62%, rgba(0,0,0,0.025) 62.5%, transparent 63%,
+      transparent 68%, rgba(0,0,0,0.02) 68.5%, transparent 69%,
+      transparent 74%, rgba(0,0,0,0.025) 74.5%, transparent 75%,
+      transparent 80%, rgba(0,0,0,0.02) 80.5%, transparent 81%,
+      transparent 86%, rgba(0,0,0,0.025) 86.5%, transparent 87%,
+      transparent 92%, rgba(0,0,0,0.02) 92.5%, transparent 93%,
+      transparent 97%, rgba(0,0,0,0.025) 97.5%, transparent 98%
+    );
+}
+
+.paper-modern::after {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(0, 0, 0, 0.03) 15%,
+    rgba(0, 0, 0, 0.035) 50%,
+    rgba(0, 0, 0, 0.03) 85%,
+    transparent 95%
+  );
+}
+
+.paper-modern .open-paper-seal {
+  background: radial-gradient(circle at 40% 40%,
+    rgba(59, 130, 246, 0.22) 0%,
+    rgba(37, 99, 235, 0.15) 50%,
+    rgba(29, 78, 216, 0.10) 100%
+  );
+  border: 1.5px solid rgba(59, 130, 246, 0.20);
+}
+
+.paper-modern .open-paper-seal::before {
+  color: rgba(40, 90, 200, 0.45);
+}
+
+.paper-modern .open-paper-meta::after {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(91, 141, 239, 0.30) 20%,
+    rgba(91, 141, 239, 0.30) 80%,
+    transparent
+  );
+}
+
+/* ========== 样式3：水墨古风 ========== */
+.paper-ink {
+  background:
+    radial-gradient(ellipse at 60% 30%, rgba(255,255,255,0.5) 0%, transparent 60%),
+    linear-gradient(180deg, #F5F3F0 0%, #E8E4DF 50%, #DDD8D0 100%);
+  box-shadow:
+    0 28px 70px rgba(100, 90, 80, 0.15),
+    0 12px 30px rgba(60, 50, 40, 0.10),
+    0 4px 12px rgba(40, 30, 20, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.50),
+    inset 0 -2px 8px rgba(200, 190, 180, 0.3);
+}
+
+.paper-ink::before {
+  height: 7px;
+  background:
+    linear-gradient(90deg,
+      transparent 0%, transparent 4%,
+      rgba(80,70,60,0.08) 4.5%, transparent 5.5%,
+      transparent 10%, rgba(80,70,60,0.10) 10.5%, transparent 11.5%,
+      transparent 16%, rgba(80,70,60,0.07) 16.5%, transparent 17.5%,
+      transparent 22%, rgba(80,70,60,0.09) 22.5%, transparent 23.5%,
+      transparent 28%, rgba(80,70,60,0.08) 28.5%, transparent 29.5%,
+      transparent 34%, rgba(80,70,60,0.10) 34.5%, transparent 35.5%,
+      transparent 40%, rgba(80,70,60,0.07) 40.5%, transparent 41.5%,
+      transparent 46%, rgba(80,70,60,0.09) 46.5%, transparent 47.5%,
+      transparent 52%, rgba(80,70,60,0.08) 52.5%, transparent 53.5%,
+      transparent 58%, rgba(80,70,60,0.10) 58.5%, transparent 59.5%,
+      transparent 64%, rgba(80,70,60,0.07) 64.5%, transparent 65.5%,
+      transparent 70%, rgba(80,70,60,0.09) 70.5%, transparent 71.5%,
+      transparent 76%, rgba(80,70,60,0.08) 76.5%, transparent 77.5%,
+      transparent 82%, rgba(80,70,60,0.10) 82.5%, transparent 83.5%,
+      transparent 88%, rgba(80,70,60,0.07) 88.5%, transparent 89.5%,
+      transparent 94%, rgba(80,70,60,0.09) 94.5%, transparent 95.5%,
+      transparent 98%, rgba(80,70,60,0.06) 98.5%, transparent 99.5%
+    );
+}
+
+.paper-ink::after {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(60, 50, 40, 0.08) 15%,
+    rgba(60, 50, 40, 0.10) 50%,
+    rgba(60, 50, 40, 0.08) 85%,
+    transparent 95%
+  );
+}
+
+.paper-ink .open-paper-seal {
+  background: radial-gradient(circle at 40% 40%,
+    rgba(60, 50, 40, 0.30) 0%,
+    rgba(40, 30, 20, 0.22) 50%,
+    rgba(30, 20, 10, 0.15) 100%
+  );
+  border: 1.5px solid rgba(50, 40, 30, 0.25);
+}
+
+.paper-ink .open-paper-seal::before {
+  color: rgba(50, 40, 30, 0.50);
+}
+
+.paper-ink .open-paper-meta::after {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(100, 90, 80, 0.20) 20%,
+    rgba(100, 90, 80, 0.20) 80%,
+    transparent
+  );
+}
+
+/* ========== 样式4：温暖奶油 ========== */
+.paper-cream {
+  background:
+    radial-gradient(ellipse at 40% 25%, rgba(255,250,245,0.7) 0%, transparent 55%),
+    linear-gradient(180deg, #FFF8F0 0%, #FFE8D8 50%, #FFDCC8 100%);
+  box-shadow:
+    0 26px 68px rgba(220, 160, 120, 0.18),
+    0 12px 32px rgba(180, 120, 80, 0.12),
+    0 4px 14px rgba(140, 90, 60, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    inset 0 -3px 10px rgba(255, 220, 200, 0.4);
+}
+
+.paper-cream::before {
+  height: 7px;
+  background:
+    linear-gradient(90deg,
+      transparent 0%, transparent 3%,
+      rgba(200,150,100,0.10) 3.5%, transparent 4.5%,
+      transparent 9%, rgba(200,150,100,0.12) 9.5%, transparent 10.5%,
+      transparent 15%, rgba(200,150,100,0.08) 15.5%, transparent 16.5%,
+      transparent 21%, rgba(200,150,100,0.11) 21.5%, transparent 22.5%,
+      transparent 27%, rgba(200,150,100,0.10) 27.5%, transparent 28.5%,
+      transparent 33%, rgba(200,150,100,0.12) 33.5%, transparent 34.5%,
+      transparent 39%, rgba(200,150,100,0.08) 39.5%, transparent 40.5%,
+      transparent 45%, rgba(200,150,100,0.11) 45.5%, transparent 46.5%,
+      transparent 51%, rgba(200,150,100,0.10) 51.5%, transparent 52.5%,
+      transparent 57%, rgba(200,150,100,0.12) 57.5%, transparent 58.5%,
+      transparent 63%, rgba(200,150,100,0.08) 63.5%, transparent 64.5%,
+      transparent 69%, rgba(200,150,100,0.11) 69.5%, transparent 70.5%,
+      transparent 75%, rgba(200,150,100,0.10) 75.5%, transparent 76.5%,
+      transparent 81%, rgba(200,150,100,0.12) 81.5%, transparent 82.5%,
+      transparent 87%, rgba(200,150,100,0.08) 87.5%, transparent 88.5%,
+      transparent 93%, rgba(200,150,100,0.11) 93.5%, transparent 94.5%,
+      transparent 97%, rgba(200,150,100,0.09) 97.5%, transparent 98.5%
+    );
+}
+
+.paper-cream::after {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(200, 150, 110, 0.12) 15%,
+    rgba(200, 150, 110, 0.15) 50%,
+    rgba(200, 150, 110, 0.12) 85%,
+    transparent 95%
+  );
+}
+
+.paper-cream .open-paper-seal {
+  background: radial-gradient(circle at 40% 40%,
+    rgba(230, 120, 140, 0.35) 0%,
+    rgba(210, 90, 110, 0.25) 50%,
+    rgba(190, 70, 90, 0.18) 100%
+  );
+  border: 1.5px solid rgba(210, 110, 130, 0.30);
+}
+
+.paper-cream .open-paper-seal::before {
+  color: rgba(180, 80, 100, 0.55);
+}
+
+.paper-cream .open-paper-meta::after {
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(220, 150, 120, 0.28) 20%,
+    rgba(220, 150, 120, 0.28) 80%,
+    transparent
+  );
+}
+
+/* ========== 印章通用样式 ========== */
+.open-paper-seal {
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5) rotate(-12deg);
+  pointer-events: none;
+  z-index: 2;
+  animation: sealStamp 0.5s 0.7s ease forwards;
+}
+
+.open-paper-seal::before {
+  content: '印';
+  font-size: 16px;
+  font-weight: 600;
+  font-family: serif;
+}
+
+@keyframes sealStamp {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-12deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1) rotate(-12deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-12deg);
+  }
 }
 
 .open-paper-header {
@@ -1181,10 +1592,27 @@ body.letter-reading .main-area {
 }
 
 .open-paper-meta {
-  padding: 10px 26px 16px;
+  padding: 10px 26px 18px;
   font-size: 13px;
   color: #6B7280;
   text-align: center;
+  position: relative;
+}
+
+.open-paper-meta::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(91, 141, 239, 0.3) 20%,
+    rgba(91, 141, 239, 0.3) 80%,
+    transparent
+  );
 }
 
 .open-paper-content {
@@ -1319,108 +1747,135 @@ body.letter-reading .main-area {
   height: 44px;
 }
 
-/* ========== 打开动画 ========== */
+/* ========== 打开动画（优化版：1.3s 总时长） ========== */
 
 .letter-scene.play .open-envelope-seal {
-  animation: sealFade 0.3s 0.15s ease forwards;
+  animation: sealFade 0.2s 0.1s ease forwards;
 }
 
 .letter-scene.play .open-envelope-flap {
-  animation: flapOpen 0.8s 0.1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards,
-             flapSink 0.4s 1.4s ease forwards;
+  animation: flapOpen 0.5s 0.08s cubic-bezier(0.25, 0.8, 0.25, 1) forwards,
+             flapSink 0.35s 0.65s ease forwards;
 }
 
 .letter-scene.play .open-envelope-front {
-  animation: frontFold 0.5s 0.35s ease forwards;
+  animation: frontFade 0.45s 0.2s ease forwards;
 }
 
 .letter-scene.play .open-paper {
-  animation: paperRise 0.7s 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: paperRise 0.55s 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .letter-scene.play .open-paper-body {
-  animation: bodyReveal 0.5s 0.45s ease forwards;
+  animation: bodyReveal 0.5s 0.38s ease forwards;
 }
 
-/* ========== 关闭动画 ========== */
+/* ========== 关闭动画（信封整体消失） ========== */
 
-.letter-overlay.closing .open-paper {
-  animation: paperLower 0.5s 0.1s ease-in forwards;
+.letter-overlay.closing .open-envelope {
+  animation: envelopeRetract 0.5s cubic-bezier(0.4, 0, 0.8, 0.2) forwards;
 }
 
-.letter-overlay.closing .open-paper-body {
-  animation: bodyHide 0.35s ease-in forwards;
-}
-
-.letter-overlay.closing .open-envelope-flap {
-  animation: flapClose 0.7s 0.25s cubic-bezier(0.4, 0, 0.8, 0.2) forwards;
-}
-
-.letter-overlay.closing .open-envelope-front {
-  animation: frontRestore 0.4s 0.5s ease forwards;
-}
-
-.letter-overlay.closing .open-envelope-seal {
-  animation: sealAppear 0.3s 0.3s ease-out forwards;
+@keyframes envelopeRetract {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+  }
 }
 
 .letter-overlay.closing {
-  animation: overlayFadeOut 0.7s 0.4s ease forwards;
+  animation: overlayFadeOutClose 0.4s 0.4s ease forwards;
+}
+
+@keyframes overlayFadeOutClose {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ========== 关键帧 ========== */
 
 @keyframes sealFade {
-  to { opacity: 0; transform: translateX(-50%) scale(0.5); }
+  0% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.5); }
 }
 
 @keyframes flapOpen {
-  to { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); }
+  0% {
+    clip-path: polygon(4% 0%, 96% 0%, 100% 100%, 0% 100%);
+    transform: translateY(0);
+  }
+  50% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    transform: translateY(-8px);
+  }
+  100% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    transform: translateY(4px);
+    opacity: 0;
+  }
 }
 
 @keyframes flapSink {
   to { opacity: 0; transform: translateY(8px); }
 }
 
-@keyframes frontFold {
-  0% { opacity: 1; transform: scaleY(1) translateY(0); }
-  100% { opacity: 0; transform: scaleY(0.2) translateY(-30px); }
+@keyframes frontFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @keyframes frontRestore {
-  0% { opacity: 0; transform: scaleY(0.2) translateY(-30px); }
-  100% { opacity: 1; transform: scaleY(1) translateY(0); }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes paperRise {
-  0% { opacity: 0; transform: translate(-50%, -5%) scale(0.9); }
+  0% { opacity: 0; transform: translate(-50%, -5%) scale(0.92); }
   100% { opacity: 1; transform: translate(-50%, -55%) scale(1); }
 }
 
 @keyframes bodyReveal {
-  0% { opacity: 0; transform: scale(0.95); }
+  0% { opacity: 0; transform: scale(0.96); }
   100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes bodyHide {
-  to { opacity: 0; transform: scale(0.95); }
+  to { opacity: 0; transform: scale(0.96); }
 }
 
 @keyframes paperLower {
-  to { opacity: 0; transform: translate(-50%, -5%) scale(0.9); }
+  0% { opacity: 1; transform: translate(-50%, -55%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -5%) scale(0.92); }
 }
 
 @keyframes flapClose {
-  0% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); opacity: 1; }
-  100% { clip-path: polygon(4% 0%, 96% 0%, 100% 100%, 0% 100%); opacity: 1; }
+  0% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+  100% {
+    clip-path: polygon(4% 0%, 96% 0%, 100% 100%, 0% 100%);
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes sealAppear {
-  to { opacity: 1; transform: translateX(-50%) scale(1); }
+  0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
 @keyframes overlayFadeOut {
-  to { opacity: 0; }
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ========== 图片放大弹窗 ========== */
@@ -1789,6 +2244,160 @@ body.elder-mode .msg-tag-label {
 
 body.elder-mode .msg-emotion-tag {
   font-size: 12px;
+}
+
+/* ========== 写信模态框父母端适配 ========== */
+body.elder-mode .compose-panel {
+  padding: 28px 32px;
+}
+
+body.elder-mode .compose-close {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+}
+
+body.elder-mode .compose-paper-head {
+  font-size: 20px;
+}
+
+body.elder-mode .compose-textarea {
+  font-size: 18px;
+  line-height: 2;
+  min-height: 220px;
+}
+
+body.elder-mode .compose-textarea::placeholder {
+  font-size: 17px;
+}
+
+body.elder-mode .compose-image-item img {
+  height: 110px;
+}
+
+body.elder-mode .compose-image-remove {
+  width: 26px;
+  height: 26px;
+  font-size: 15px;
+}
+
+body.elder-mode .compose-actions button {
+  height: 48px;
+  padding: 0 22px;
+  font-size: 15px;
+}
+
+body.elder-mode .compose-hint {
+  font-size: 14px;
+}
+
+/* ========== 按钮触控优化 ========== */
+body.elder-mode .send-btn {
+  min-width: 52px;
+  min-height: 52px;
+  font-size: 20px;
+}
+
+body.elder-mode .voice-btn {
+  min-height: 52px;
+  padding: 14px 32px;
+}
+
+body.elder-mode .cal-nav-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ========== Lightbox 父母端适配 ========== */
+body.elder-mode .lightbox-close {
+  width: 48px;
+  height: 48px;
+  font-size: 28px;
+  line-height: 48px;
+}
+
+body.elder-mode .lightbox-img {
+  max-width: 92vw;
+  max-height: 90vh;
+}
+
+body.elder-mode .lightbox-prev,
+body.elder-mode .lightbox-next {
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+}
+
+body.elder-mode .lightbox-counter {
+  font-size: 16px;
+}
+
+/* ========== 家书阅读器父母端适配 ========== */
+body.elder-mode .letter-close {
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  line-height: 44px;
+}
+
+body.elder-mode .open-envelope {
+  width: min(580px, 74vw);
+  height: 380px;
+}
+
+body.elder-mode .open-paper {
+  width: min(640px, 88vw);
+  height: min(68vh, 600px);
+}
+
+body.elder-mode .open-paper-header {
+  font-size: 28px;
+  padding: 28px 30px 0;
+}
+
+body.elder-mode .open-paper-content {
+  font-size: 20px;
+  line-height: 2.0;
+  padding: 16px 30px 24px;
+}
+
+body.elder-mode .open-paper-meta {
+  font-size: 16px;
+  padding: 0 30px 20px;
+}
+
+body.elder-mode .open-paper-seal {
+  top: 24px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+}
+
+body.elder-mode .open-paper-seal::before {
+  font-size: 20px;
+}
+
+/* ========== 附件确认弹窗父母端适配 ========== */
+body.elder-mode .attach-confirm-dialog {
+  padding: 28px;
+  width: 360px;
+  border-radius: 20px;
+}
+
+body.elder-mode .attach-confirm-title {
+  font-size: 21px;
+}
+
+body.elder-mode .attach-confirm-preview {
+  font-size: 16px;
+  padding: 18px;
+}
+
+body.elder-mode .attach-confirm-cancel,
+body.elder-mode .attach-confirm-ok {
+  padding: 14px 24px;
+  font-size: 16px;
+  min-height: 48px;
 }
 
 @media (max-width: 900px) {

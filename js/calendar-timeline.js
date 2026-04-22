@@ -1,3 +1,7 @@
+// ========== 命名空间保护 ==========
+if (!window.CalendarApp.render) window.CalendarApp.render = {};
+if (!window.CalendarApp.render.timeline) window.CalendarApp.render.timeline = {};
+
 // ========== 温情检测缓存 ==========
 const warmthHintCache = new Map();
 

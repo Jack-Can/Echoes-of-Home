@@ -2,47 +2,44 @@
 // 使用 transformers.js 加载本地模型进行情感分类
 
 let sentimentClassifier = null;
-let sentimentPipelineReady = false;
+let initPromise = null;
 
-// ========== 初始化模型 ==========
+// ========== 初始化模型（Promise单例，避免重复加载） ==========
 async function initSentimentPipeline() {
-  if (sentimentPipelineReady) return;
+  if (initPromise) return initPromise;
 
   console.log('正在加载情感分析模型...');
   const startTime = Date.now();
 
-  try {
-    // 动态导入 transformers.js
-    const { pipeline, env } = await import('./lib/transformers.min.js');
+  initPromise = (async () => {
+    try {
+      const { pipeline, env } = await import('./lib/transformers.min.js');
 
-    // 配置本地模型路径
-    env.localModelPath = './models/albert_chinese_small_sentiment';
-    env.allowLocalModels = true;
+      env.allowLocalModels = true;
 
-    // 加载本地模型
-    sentimentClassifier = await pipeline(
-      'text-classification',
-      './models/albert_chinese_small_sentiment',
-      { 
-        device: 'wasm',
-        dtype: 'q8'  // 8位量化
-      }
-    );
+      sentimentClassifier = await pipeline(
+        'text-classification',
+        './models/albert_chinese_small_sentiment',
+        {
+          device: 'wasm'
+        }
+      );
 
-    sentimentPipelineReady = true;
-    const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`情感分析模型加载完成，耗时 ${loadTime}s`);
-  } catch (error) {
-    console.error('模型加载失败:', error);
-    throw error;
-  }
+      const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`情感分析模型加载完成，耗时 ${loadTime}s`);
+    } catch (error) {
+      console.error('模型加载失败:', error);
+      initPromise = null;
+      throw error;
+    }
+  })();
+
+  return initPromise;
 }
 
 // ========== 分析情感（正向分数） ==========
 async function analyzeSentiment(text) {
-  if (!sentimentPipelineReady) {
-    await initSentimentPipeline();
-  }
+  await initPromise;
 
   try {
     const results = await sentimentClassifier(text);

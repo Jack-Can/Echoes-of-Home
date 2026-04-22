@@ -152,3 +152,49 @@
 .nav-sidebar-item .nav-icon {
   font-size: 20px;
 }
+
+/* ========== 父母端友好型适配 ========== */
+body.elder-mode .logo-text {
+  font-size: 30px;
+}
+
+body.elder-mode .logo-sub {
+  font-size: 13px;
+}
+
+body.elder-mode .identity-btn {
+  font-size: 16px;
+  padding: 14px 8px;
+  min-height: 48px;
+}
+
+body.elder-mode .weather-emoji {
+  font-size: 72px;
+}
+
+body.elder-mode .weather-status {
+  font-size: 21px;
+}
+
+body.elder-mode .weather-detail {
+  font-size: 16px;
+}
+
+body.elder-mode .tip-text {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+body.elder-mode .tip-label {
+  font-size: 13px;
+}
+
+body.elder-mode .nav-sidebar-item {
+  font-size: 18px;
+  padding: 16px;
+  min-height: 52px;
+}
+
+body.elder-mode .nav-sidebar-item .nav-icon {
+  font-size: 24px;
+}

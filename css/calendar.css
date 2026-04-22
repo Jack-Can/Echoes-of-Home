@@ -774,3 +774,202 @@
   font-weight: 600;
   color: var(--cal-color-text-primary);
 }
+
+/* ========== 父母端友好型适配 ========== */
+body.elder-mode .cal-month-title {
+  font-size: 24px;
+}
+
+body.elder-mode .cal-nav-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+}
+
+body.elder-mode .cal-weekday {
+  font-size: 15px;
+  padding: 10px 0;
+}
+
+body.elder-mode .cal-cell {
+  min-height: 96px;
+  padding: 10px;
+}
+
+body.elder-mode .cal-cell-date {
+  font-size: 18px;
+}
+
+body.elder-mode .cal-cell--today .cal-cell-date {
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+}
+
+body.elder-mode .cal-cell-dot--warmth {
+  font-size: 13px;
+}
+
+body.elder-mode .cal-cell-dot--anniversary {
+  font-size: 15px;
+}
+
+body.elder-mode .cal-cell-more {
+  font-size: 13px;
+}
+
+body.elder-mode .cal-weather-icon {
+  font-size: 32px;
+}
+
+body.elder-mode .cal-temp-meter {
+  width: 30px;
+  height: 50px;
+}
+
+body.elder-mode .cal-timeline-date {
+  font-size: 20px;
+}
+
+body.elder-mode .cal-timeline-close {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+}
+
+body.elder-mode .cal-timeline-summary {
+  font-size: 15px;
+  padding: 10px 14px;
+}
+
+body.elder-mode .cal-msg-bubble {
+  font-size: 17px;
+  padding: 12px 16px;
+  line-height: 1.6;
+}
+
+body.elder-mode .cal-msg-header {
+  font-size: 14px;
+}
+
+body.elder-mode .cal-msg-avatar {
+  font-size: 20px;
+}
+
+body.elder-mode .cal-ai-label {
+  font-size: 13px;
+}
+
+body.elder-mode .cal-ai-original {
+  font-size: 14px;
+}
+
+body.elder-mode .cal-ai-polished {
+  font-size: 15px;
+}
+
+body.elder-mode .cal-warmth-btn {
+  font-size: 14px;
+  padding: 6px 10px;
+  opacity: 1;
+  min-height: 36px;
+}
+
+body.elder-mode .cal-voice-play {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+
+body.elder-mode .cal-voice-icon {
+  font-size: 20px;
+}
+
+body.elder-mode .cal-voice-waveform,
+body.elder-mode .cal-voice-duration {
+  font-size: 14px;
+}
+
+body.elder-mode .cal-photo-placeholder {
+  font-size: 56px;
+}
+
+body.elder-mode .cal-photo-caption {
+  font-size: 14px;
+}
+
+body.elder-mode .cal-filter-tag {
+  font-size: 15px;
+  padding: 8px 16px;
+  min-height: 40px;
+}
+
+body.elder-mode .cal-collect-card {
+  padding: 16px;
+  font-size: 15px;
+}
+
+body.elder-mode .cal-report-title {
+  font-size: 34px;
+}
+
+body.elder-mode .cal-report-stat {
+  font-size: 60px;
+}
+
+body.elder-mode .cal-report-close {
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+}
+
+body.elder-mode .cal-report-screen {
+  padding: 48px 24px;
+}
+
+body.elder-mode .cal-memo-alert {
+  padding: 14px 18px;
+}
+
+body.elder-mode .cal-memo-icon {
+  font-size: 24px;
+}
+
+body.elder-mode .cal-memo-text {
+  font-size: 16px;
+}
+
+body.elder-mode .cal-memo-btn {
+  font-size: 15px;
+  padding: 8px 14px;
+  min-height: 40px;
+}
+
+body.elder-mode .cal-countdown-title {
+  font-size: 16px;
+}
+
+body.elder-mode .cal-countdown-days {
+  font-size: 28px;
+}
+
+body.elder-mode .cal-quick-btn {
+  font-size: 16px;
+  padding: 16px;
+  min-height: 52px;
+}
+
+body.elder-mode .cal-warmth-title {
+  font-size: 22px;
+}
+
+body.elder-mode .cal-back-btn {
+  font-size: 16px;
+  padding: 12px 20px;
+  min-height: 44px;
+}
+
+body.elder-mode .cal-warmth-tag {
+  font-size: 13px;
+  padding: 4px 10px;
+}
