@@ -151,7 +151,7 @@ CalendarApp.render.report.open = function() {
           <div class="cal-report-card-title">💌 给彼此的一句话</div>
           <div class="cal-report-quote">"无论走多远，家的声音永远在身后"</div>
           <div class="cal-report-author">— 家的回声</div>
-          <button class="cal-report-share" onclick="alert('📤 已分享给爸妈（模拟）')">📤 分享给爸妈</button>
+          <button class="cal-report-share" onclick="CalendarApp.render.report.shareQuote()">📤 分享给对方</button>
         </div>
       </div>
     </div>
@@ -200,6 +200,18 @@ CalendarApp.render.report.close = function() {
   if (report) {
     report.remove();
   }
+};
+
+// ========== 分享引言到家书 ==========
+CalendarApp.render.report.shareQuote = function() {
+  const isParent = window.CURRENT_USER === 'parent';
+  const quote = isParent
+    ? '"无论走多远，家的声音永远在身后" — 家的回声'
+    : '"爸爸妈妈，您们辛苦了" — 家的回声';
+  if (typeof window.appendLetterMessage === 'function') {
+    window.appendLetterMessage(quote, []);
+  }
+  CalendarApp.render.report.close();
 };
 
 // ========== 报告模块样式（动态注入）==========
