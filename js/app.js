@@ -1,5 +1,5 @@
 // ========== 全局状态 ==========
-let CURRENT_USER = 'child';
+window.CURRENT_USER = 'child';
 let LATEST_INPUT_TEXT = '';
 let pendingBufferMsg = null;
 let CHAT_TIMELINE = [];
@@ -461,7 +461,7 @@ function createMsgElement(msg) {
 
 // ========== 身份切换 ==========
 function switchIdentity(identity) {
-  CURRENT_USER = identity;
+  window.CURRENT_USER = identity;
   LATEST_INPUT_TEXT = '';
   msgInput.value = '';
   pendingBufferMsg = null;
@@ -507,11 +507,24 @@ function updateWeatherCard() {
   const dates = Object.keys(records).sort();
   const lastMsgDate = dates.length > 0 ? dates[dates.length - 1] : null;
   const days = CalendarApp.render.weather.getDaysSince(lastMsgDate);
+  const isParent = CURRENT_USER === 'parent';
 
   const weatherMap = {
-    sunny: { emoji: '☀️', status: '晴朗', detail: days === 1 ? '已联系：刚刚' : `已联系：${days}天前` },
-    cloudy: { emoji: '⛅', status: '多云', detail: `已联系：${days}天前` },
-    rainy: { emoji: '🌧️', status: '雨天', detail: `已联系：${days}天前` }
+    sunny: { 
+      emoji: '☀️', 
+      status: '晴朗', 
+      detail: days === 1 ? '已联系：刚刚' : `已联系：${days}天前` 
+    },
+    cloudy: { 
+      emoji: '⛅', 
+      status: '多云', 
+      detail: `已联系：${days}天前` 
+    },
+    rainy: { 
+      emoji: '🌧️', 
+      status: '雨天', 
+      detail: `已联系：${days}天前` 
+    }
   };
 
   const info = weatherMap[weather] || weatherMap.sunny;
@@ -614,6 +627,20 @@ function appendChatBubble(from, content, msgType = 'chat', fileName = '') {
   }
 
   CHAT_TIMELINE.push(entry);
+
+  // 同步到日历聊天记录（供天气计算使用）
+  if (CalendarApp && CalendarApp.data && CalendarApp.data.chatRecords) {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    if (!CalendarApp.data.chatRecords[dateStr]) {
+      CalendarApp.data.chatRecords[dateStr] = [];
+    }
+    CalendarApp.data.chatRecords[dateStr].push({
+      sender: senderRole,
+      content: content,
+      type: msgType
+    });
+  }
 
   const msg = {
     id: entry.id,

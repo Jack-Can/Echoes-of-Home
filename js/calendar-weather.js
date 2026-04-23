@@ -141,8 +141,19 @@ CalendarApp.render.weather.closeCard = function() {
 
 // ========== 快捷回复 ==========
 CalendarApp.render.weather.quickReply = function(text) {
-  alert('📤 已发送: ' + text + '\n\n（模拟发送成功）');
+  if (typeof appendChatBubble === 'function') {
+    appendChatBubble('me', text);
+  }
   CalendarApp.render.weather.closeCard();
+  if (typeof switchView === 'function') {
+    switchView('chat');
+  }
+  if (CalendarApp && CalendarApp.render && CalendarApp.render.weather) {
+    CalendarApp.render.weather.updateTipBox();
+    if (typeof updateWeatherCard === 'function') {
+      updateWeatherCard();
+    }
+  }
 };
 
 // ========== 渲染温度计 ==========
@@ -185,16 +196,18 @@ CalendarApp.render.weather.updateTipBox = function() {
   const lastMsgDate = dates.length > 0 ? dates[dates.length - 1] : null;
   const days = CalendarApp.render.weather.getDaysSince(lastMsgDate);
   const tips = CalendarApp.data.aiSuggestions.dailyTips;
+  const isParent = window.CURRENT_USER === 'parent';
+  const targetName = isParent ? '孩子' : '爸妈';
   
   if (weather === 'rainy') {
     tipBox.classList.add('rainy');
     tipBox.innerHTML = `
       <div class="tip-label">🌧️ 关系气象站提醒</div>
       <div class="rainy-icon">🌧️</div>
-      <div class="rainy-text">已经 ${days} 天没和爸妈聊天了，要不要发个消息？</div>
+      <div class="rainy-text">已经 ${days} 天没和${targetName}聊天了，要不要发个消息？</div>
       <div class="rainy-btns">
-        <button onclick="CalendarApp.render.weather.quickReply('今天吃了吗？想你们了 😊')">今天吃了吗？</button>
-        <button onclick="CalendarApp.render.weather.quickReply('刚看到一个好玩的')">刚看到一个好玩的</button>
+        <button onclick="CalendarApp.render.weather.quickReply('${isParent ? '孩子，今天怎么样？' : '今天吃了吗？想你们了 😊'}')">${isParent ? '孩子，今天怎么样？' : '今天吃了吗？'}</button>
+        <button onclick="CalendarApp.render.weather.quickReply('${isParent ? '刚看到一个好玩的' : '刚看到一个好玩的'}')">${isParent ? '好玩的' : '好玩的'}</button>
       </div>
     `;
   } else {
