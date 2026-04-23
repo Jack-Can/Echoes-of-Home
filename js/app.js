@@ -563,7 +563,6 @@ function sendMessage() {
   const text = msgInput.value.trim();
   if (!text) return;
 
-  // 演示版硬条件：仅检测完整关键词"你好烦啊"
   if (CURRENT_USER === 'child' && containsEmotionKeyword(text)) {
     pendingBufferMsg = text;
     openEmotionModal();
@@ -692,7 +691,25 @@ function appendLetterMessage(content, images = []) {
 
 // ========== AI 情绪检测弹窗 ==========
 function containsEmotionKeyword(text) {
-  return text.includes('你好烦啊');
+  const keywords = [
+    '你好烦啊',
+    '烦死了',
+    '恨', '恨死了',
+    '气死了', '气死我了',
+    '恼火',
+    '崩溃', '快崩溃', '人要崩溃',
+    '心碎',
+    '哭', '想哭', '哭了',
+    '委屈', '委屈巴巴',
+    '绝望',
+    '累死了', '累坏了',
+    '困死了',
+    '焦虑', '好焦虑',
+    '压力山大',
+    '别管我', '少管我',
+    '滚', '走开'
+  ];
+  return keywords.some(kw => text.includes(kw));
 }
 
 function setupEmotionModal() {
