@@ -73,39 +73,5 @@ async function analyzeSentiment(text) {
   }
 }
 
-// ========== 温情检测（基于正向分数） ==========
-async function detectWarmth(text) {
-  const result = await analyzeSentiment(text);
-  return {
-    isWarmth: result.positiveScore > 0.7,
-    positiveScore: result.positiveScore,
-    label: result.label
-  };
-}
-
-// ========== 批量分析 ==========
-async function batchAnalyze(texts) {
-  const results = await Promise.all(texts.map(t => analyzeSentiment(t)));
-  return results;
-}
-
-// ========== 测试函数 ==========
-async function testSentiment() {
-  const testTexts = [
-    '我好累呀',
-    '妈，我想你了',
-    '今天复习好烦',
-    '谢谢妈',
-    '注意身体',
-    '吃了吗'
-  ];
-
-  console.log('\n========== 情感分析测试 ==========');
-  for (const text of testTexts) {
-    const result = await analyzeSentiment(text);
-    console.log(`"${text}" => positive: ${result.positiveScore.toFixed(3)}, label: ${result.label}`);
-  }
-}
-
-// 预加载模型
+// ========== 预加载模型
 initSentimentPipeline().catch(console.error);

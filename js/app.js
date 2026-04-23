@@ -566,7 +566,7 @@ function sendMessage() {
   // 演示版硬条件：仅检测完整关键词"你好烦啊"
   if (CURRENT_USER === 'child' && containsEmotionKeyword(text)) {
     pendingBufferMsg = text;
-    openEmotionModal(text);
+    openEmotionModal();
     return;
   }
 
@@ -703,11 +703,11 @@ function setupEmotionModal() {
     <div class="emotion-backdrop"></div>
     <div class="emotion-card" role="dialog" aria-modal="true" aria-label="AI 情绪检测提示">
       <div class="emotion-icon">🛡️</div>
-      <div class="emotion-title">AI 检测到可能的负向情绪</div>
-      <div class="emotion-desc" id="emotionPreview"></div>
+      <div class="emotion-title">检测到负面情绪</div>
+      <div class="emotion-desc" id="emotionPreview">你今天是不是压力太大了？深呼吸……爸妈只是心疼你。要不要换个方式表达？</div>
       <div class="emotion-actions">
-        <button class="emotion-btn polish" onclick="confirmEmotionPolish()">确定润色</button>
-        <button class="emotion-btn send" onclick="confirmEmotionSend()">继续发送</button>
+        <button class="emotion-btn send" onclick="confirmEmotionThink()">我再想想</button>
+        <button class="emotion-btn confirm" onclick="confirmEmotionSend()">继续发送</button>
       </div>
     </div>
   `;
@@ -717,9 +717,8 @@ function setupEmotionModal() {
   emotionPreviewText = document.getElementById('emotionPreview');
 }
 
-function openEmotionModal(text) {
-  if (!emotionOverlay || !emotionPreviewText) return;
-  emotionPreviewText.textContent = `检测关键词："${text}"`;
+function openEmotionModal() {
+  if (!emotionOverlay) return;
   emotionOverlay.classList.remove('hidden');
   document.body.classList.add('emotion-checking');
 }
@@ -728,6 +727,11 @@ function closeEmotionModal() {
   if (!emotionOverlay || emotionOverlay.classList.contains('hidden')) return;
   emotionOverlay.classList.add('hidden');
   document.body.classList.remove('emotion-checking');
+}
+
+function confirmEmotionThink() {
+  pendingBufferMsg = null;
+  closeEmotionModal();
 }
 
 function confirmEmotionPolish() {
@@ -749,7 +753,7 @@ function confirmEmotionSend() {
   closeEmotionModal();
 }
 
-// ========== 文字润色 ==========
+// ========== 文字润色 ==========[这里还需要优化一下]
 function polishText(text) {
   return text
     .replace(/烦/g, '有些操心')
@@ -797,11 +801,11 @@ function setupLetterComposer() {
           </div>
         </div>
         <div class="compose-actions">
-          <button class="compose-add-image" onclick="triggerComposeImagePick()">＋ 贴图片</button>
+          <button class="compose-add-image" onclick="triggerComposeImagePick()"><span>＋ 贴图片</span></button>
           <input id="composeImageInput" class="compose-image-input" type="file" accept="image/*" multiple>
-          <button class="compose-ai-btn" id="composeAiBtn" onclick="handleComposePolish()">一键成书</button>
-          <button class="compose-pack-btn" id="composePackBtn" onclick="handleComposePack()" disabled>装入信封</button>
-          <button class="compose-send-btn" id="composeSendBtn" onclick="handleComposeSend()" disabled>寄给对方</button>
+          <button class="compose-ai-btn" id="composeAiBtn" onclick="handleComposePolish()"><span>一键成书</span></button>
+          <button class="compose-pack-btn" id="composePackBtn" onclick="handleComposePack()"><span>装入信封</span></button>
+          <button class="compose-send-btn" id="composeSendBtn" onclick="handleComposeSend()"><span>寄给对方</span></button>
           <div class="compose-hint" id="composeHint">先写好内容，再点击一键成书。</div>
         </div>
       </div>
@@ -871,10 +875,6 @@ function resetLetterComposer() {
   if (composeAiBtn) {
     composeAiBtn.disabled = false;
     composeAiBtn.textContent = '一键成书';
-  }
-
-  if (composePackBtn) {
-    composePackBtn.style.display = 'none';
   }
 
   if (composeSendBtn) {
@@ -1406,14 +1406,6 @@ function htmlEscape(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function jsEscape(str) {
-  return String(str)
-    .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '');
 }
 
 // ========== 附件处理 ==========

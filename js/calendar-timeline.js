@@ -28,11 +28,6 @@ async function checkWarmthHint(msg) {
   }
 }
 
-// ========== 异步获取温情提示状态 ==========
-async function getWarmthHintAsync(msgId) {
-  return warmthHintCache.get(msgId) || false;
-}
-
 // ========== 渲染时间线面板 ==========
 CalendarApp.render.timeline.show = function(dateStr) {
   const messages = CalendarApp.utils.getMessagesByDate(dateStr);
