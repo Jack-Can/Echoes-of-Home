@@ -97,7 +97,7 @@ const SENTIMENT_LEXICON = {
     '行', '可以', '没问题', 'OK', 'ok', '好哒', '好呀',
     '哦', '哦哦', '这样啊', '原来如此', '明白了',
     '在', '在的', '嗯在', '在呢', '我在',
-    '忙', '在工作', '在加班', '在开会', '在忙',
+    '忙', '在工作', '在复习', '在写作业', '在忙',
     '吃了', '吃了饭', '吃了早饭', '吃了午饭', '吃了晚饭',
     '没事', '没啥', '没什么', '没什么事', '还好还好',
     '挺好的', '还不错', '还行吧', '马马虎虎'
@@ -304,7 +304,7 @@ const PARENT_TO_CHILD_RULES = {
   },
   stress: {
     patterns: [
-      { match: /忙|加班|压力|烦|烦躁/, interpreted: '妈妈知道你有压力', suggestion: '扛不住的时候记得回家' }
+      { match: /忙|复习|考试|压力|烦|烦躁/, interpreted: '妈妈知道你有压力', suggestion: '扛不住的时候记得回家' }
     ],
     default: { interpreted: '妈妈感觉到你最近有压力', suggestion: '放轻松，家人永远支持你' }
   },
@@ -320,7 +320,7 @@ const CHILD_TO_PARENT_RULES = {
     patterns: [
       { match: /累|好累|太累了|累死了|累坏了/, interpreted: '孩子最近很辛苦，身体有点吃不消', suggestion: '给孩子发个红包鼓励一下吧' },
       { match: /困|好困|困死了|想睡觉|想睡/, interpreted: '孩子可能没睡好，休息不够', suggestion: '叮嘱孩子早点休息' },
-      { match: /加班|很晚下班|熬夜|通宵/, interpreted: '孩子工作很忙，经常加班到很晚', suggestion: '语音安慰一下孩子吧' },
+      { match: /很晚下课|熬夜|通宵|复习到很晚/, interpreted: '孩子学习很忙，经常很晚才休息', suggestion: '语音安慰一下孩子吧' },
       { match: /腰酸背痛|肩膀酸|眼睛酸|脖子疼/, interpreted: '孩子身体有些吃不消了', suggestion: '关心一下孩子的身体' },
       { match: /没精神|没力气|虚|疲惫/, interpreted: '孩子看起来很疲惫', suggestion: '给孩子发个红包鼓励一下吧' }
     ],
@@ -328,7 +328,7 @@ const CHILD_TO_PARENT_RULES = {
   },
   stress: {
     patterns: [
-      { match: /烦|好烦|太烦了|烦死了/, interpreted: '孩子最近工作压力很大，有些烦躁', suggestion: '给孩子发个拥抱的表情吧' },
+      { match: /烦|好烦|太烦了|烦死了/, interpreted: '孩子最近学业压力很大，有些烦躁', suggestion: '给孩子发个拥抱的表情吧' },
       { match: /压力大|焦虑|好焦虑|焦虑不安/, interpreted: '孩子压力很大，需要理解和支持', suggestion: '多倾听，少说教' },
       { match: /崩溃|撑不住|扛不住|快崩溃/, interpreted: '孩子可能遇到了比较大的困难', suggestion: '主动给孩子打个电话吧' },
       { match: /烦躁|烦躁不安|不安|紧张/, interpreted: '孩子心里有些烦躁', suggestion: '给孩子一些安慰和理解' },
@@ -369,7 +369,7 @@ const CHILD_TO_PARENT_RULES = {
   neutral: {
     patterns: [
       { match: /好的|知道了|嗯|行|好嘞/, interpreted: '孩子收到了你的关心', suggestion: '这就是最好的回应' },
-      { match: /在忙|加班|开会/, interpreted: '孩子暂时忙，过会儿回复', suggestion: '不要着急，孩子心里有你' },
+      { match: /在忙|复习|写作业|做实验/, interpreted: '孩子暂时忙，过会儿回复', suggestion: '不要着急，孩子心里有你' },
       { match: /吃了|吃了饭|吃得很好/, interpreted: '孩子告诉你他吃了', suggestion: '孩子有在照顾自己' }
     ],
     default: { interpreted: '孩子收到了你的关心', suggestion: '' }

@@ -139,8 +139,7 @@ function updateHeaderByIdentity() {
   const peerName = CURRENT_USER === 'child' ? '老妈' : '孩子';
   headerPeerName.textContent = peerName;
   if (headerTitle) {
-    const dotHtml = '<span class="header-dot">沟通中...</span>';
-    headerTitle.innerHTML = `正在与 <strong>${peerName}</strong> ${dotHtml}`;
+    headerTitle.innerHTML = `<strong>${peerName}</strong>`;
   }
 }
 

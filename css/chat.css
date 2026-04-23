@@ -1791,11 +1791,6 @@ body.letter-reading .main-area {
   animation: overlayFadeOutClose 0.4s 0.4s ease forwards;
 }
 
-@keyframes overlayFadeOutClose {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
 /* ========== 关键帧 ========== */
 
 @keyframes sealFade {
@@ -1874,6 +1869,52 @@ body.letter-reading .main-area {
 }
 
 @keyframes overlayFadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ========== 关闭动画关键帧（反转打开动画） ========== */
+
+@keyframes bodyHideReverse {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.92); }
+}
+
+@keyframes paperLowerClose {
+  0% { opacity: 1; transform: translate(-50%, -55%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -5%) scale(0.92); }
+}
+
+@keyframes frontFadeReverse {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes sealAppearReverse {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.5) rotate(-12deg); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.1) rotate(-12deg); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1) rotate(-12deg); }
+}
+
+@keyframes flapCloseReverse {
+  0% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    transform: translateY(4px);
+    opacity: 0;
+  }
+  40% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    transform: translateY(-8px);
+    opacity: 0.8;
+  }
+  100% {
+    clip-path: polygon(4% 0%, 96% 0%, 100% 100%, 0% 100%);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeOutClose {
   0% { opacity: 1; }
   100% { opacity: 0; }
 }

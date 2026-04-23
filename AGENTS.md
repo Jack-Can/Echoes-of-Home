@@ -12,6 +12,7 @@
 ```
 ├── index.html              # 主入口
 ├── SPEC.md                 # 产品规格说明
+├── AGENTS.md               # 开发者指南（本文件）
 ├── css/                    # 样式文件
 │   ├── layout.css          # 全局布局、CSS变量(:root)
 │   ├── sidebar.css         # 侧边栏
@@ -24,26 +25,49 @@
 │   ├── data.js             # 聊天模拟数据
 │   ├── calendar-*.js       # 日历模块（7个子文件）
 │   ├── emotion-*.js        # 情感分析引擎
+│   ├── sentiment-pipeline.js  # ML情感分析管道
 │   └── lib/transformers.min.js  # 本地ML库
 └── models/                 # ML模型
     └── albert_chinese_small_sentiment/
 ```
 
+## 运行与测试命令
+
+```bash
+# 运行项目（任选一种）
+双击 index.html                    # 直接浏览器打开
+npx serve .                        # 本地服务器 http://localhost:8000
+
+# 无构建系统、无测试框架、无Linter
+# 修改代码后只需刷新浏览器即可看到效果
+```
+
 ## 代码风格规范
 
+### 通用
+
+- **语言**: 代码注释和用户文本均使用简体中文
+- **缩进**: 2空格，不使用Tab
+- **字符串**: 单引号 `''`
+- **区块注释**: `<!-- ========== 区块名 ========== -->` (HTML) / `// ========== 区块名 ==========` (JS)
+
 ### HTML
+
 - 语义化标签: `aside`, `main`, `header`, `nav`, `section`
-- 2空格缩进，区块注释: `<!-- ========== 区块名 ========== -->`
+- 区块注释分隔代码区域
+- 禁止内联样式
 
 ### CSS
+
 - **CSS变量集中在 `css/layout.css` 的 `:root` 中定义**
 - 类名: 小写 + 连字符 (如 `msg-bubble`, `weather-card`)
-- 2空格缩进，禁止内联样式
 - 属性顺序: 布局 → 尺寸 → 视觉 → 字体
+- 禁止内联样式
 
 ### JavaScript
 
 #### 命名规范
+
 | 类型 | 风格 | 示例 |
 |------|------|------|
 | 全局常量 | `UPPER_SNAKE_CASE` | `MAX_RETRY`, `CURRENT_USER` |
@@ -53,19 +77,43 @@
 | 布尔值 | `is*`/`has*`/`can*` | `isWarmth`, `hasError` |
 | 异步函数 | `*Async` 后缀 | `analyzeEmotionAsync` |
 
-#### 函数组织顺序
-1. 全局状态 (`let`/`const`) → 2. DOM引用 → 3. 初始化函数 → 4. 辅助函数 → 5. 事件绑定 → 6. 渲染函数 → 7. 业务逻辑 → 8. 弹窗函数 → 9. 工具函数 → 10. 启动代码
+#### 函数组织顺序（必须遵循）
+
+```
+1. 全局状态 (let/const)
+2. DOM引用
+3. 初始化函数
+4. 辅助函数
+5. 事件绑定
+6. 渲染函数
+7. 业务逻辑
+8. 弹窗函数
+9. 工具函数
+10. 启动代码
+```
 
 #### 代码规范
-- 单引号 `''` 表示字符串
+
 - 使用 `addEventListener` 绑定事件，优先箭头函数
 - 避免直接操作 `this`
-- 区块注释: `// ========== 区块名 ==========`
-
-#### 错误处理
 - 条件前置检查: `if (!element) return;`
 - `try-catch` 包裹可能出错的代码
-- 日志: `console.warn` (可恢复) / `console.error` (严重)
+- 日志级别: `console.warn` (可恢复) / `console.error` (严重)
+
+#### 错误处理
+
+```javascript
+// 条件前置检查
+if (!element) return;
+
+// try-catch 包裹可能出错的代码
+try {
+  const result = await analyzeSentiment(text);
+} catch (e) {
+  console.warn('ML失败，回退到规则:', e);
+  return ruleBasedAnalyze(text);
+}
+```
 
 ## 命名映射
 
@@ -107,7 +155,6 @@ try {
 - **无外部CDN**: 所有资源本地化，图片/脚本禁止CDN
 - **10MB限制**: 最终zip打包控制在10MB以内
 - **浏览器兼容**: Chrome 80+ / Firefox 75+ / Safari 13+ / Edge 80+
-- **语言**: 代码注释和用户文本均使用简体中文
 
 ## 添加新功能流程
 
@@ -120,7 +167,9 @@ try {
 ## 常见任务
 
 ### 添加新消息类型
+
 在 `app.js` 的 `createMsgElement()` 中添加类型判断：
+
 ```javascript
 if (msg.type === 'new-type') {
   const bubble = document.createElement('div');
@@ -132,6 +181,7 @@ if (msg.type === 'new-type') {
 ```
 
 ### 调用情感分析
+
 ```javascript
 const result = await analyzeEmotion('妈，我想你了', 'parent');
 console.log(result.emotionType);    // 'care'

@@ -24,7 +24,7 @@ function generateChatRecords() {
       id,
       time,
       sender,
-      senderName: sender === 'parent' ? '妈妈' : '小明',
+      senderName: sender === 'parent' ? '妈妈' : '小天',
       type,
       content,
       warmthMarked: false,
@@ -36,37 +36,37 @@ function generateChatRecords() {
   const parentMessages = [
     '儿子，今天降温了记得多穿点',
     '吃了吗？别总吃外卖，对胃不好',
-    '最近项目还顺利吗？',
+    '最近课业重不重？',
     '天冷了，注意保暖',
     '别熬夜太晚，身体要紧',
-    '新房装修到哪一步了？',
-    '下班了吗？地铁上人多注意安全',
+    '这学期课多不多？',
+    '下课了吗？食堂人多注意安全',
     '周末有空吗？想跟你视频看看',
     '家里一切都好，放心',
     '你爸今天还念叨你呢',
-    '我给你寄了点腊肠，收到没？',
-    '注意安全，过马路小心',
+    '给你寄了点零食，收到没？',
+    '注意安全，晚归小心点',
     '记得按时吃饭，别饿着',
     '别太累了，注意休息',
     '我们很好，勿念，照顾好自己'
   ];
-  
+
   const childMessages = [
     '起来了起来了，穿了厚外套放心吧妈',
     '吃了吃了，今天吃的面条',
-    '刚下班，在地铁上呢',
+    '刚下课，在图书馆呢',
     '知道了妈，您和爸也要注意身体',
-    '今天加班赶进度，不过不严重',
+    '今天复习赶进度，不过不严重',
     '妈做的红烧肉最好吃了，想念',
-    '周末要加班赶项目',
-    '今天发工资了，准备打钱给你们',
+    '周末要复习期末考试',
+    '这个月生活费省下来了，给你们买点特产',
     '挺好的，妈别担心',
     '爸的腿最近怎么样了？',
     '周末有空视频',
-    '工作顺利，就是有点忙',
+    '学习还行，就是课业重',
     '今天下雨了，记得带伞',
-    '我买了春节回家的票了！',
-    '想你们了，快一年没回家了'
+    '我买了五一回家的票了！',
+    '想你们了，快两个月没回家了'
   ];
   
   // 1月数据（春节前后，互动频繁）
@@ -278,7 +278,7 @@ CalendarApp.data.warmthMoments = [
     tag: '思念',
     summary: '想爸妈了',
     sender: 'child',
-    senderName: '小明',
+    senderName: '小天',
     originalText: '想你们了'
   },
   {
@@ -288,7 +288,7 @@ CalendarApp.data.warmthMoments = [
     tag: '开心',
     summary: '祝妈妈生日快乐',
     sender: 'child',
-    senderName: '小明',
+    senderName: '小天',
     originalText: '妈，生日快乐！'
   },
   {
@@ -326,10 +326,10 @@ CalendarApp.data.warmthMoments = [
     msgId: 'msg_2026-04-08_3',
     date: '2026-04-08',
     tag: '开心',
-    summary: '分享加班餐',
+    summary: '分享期末复习的进展',
     sender: 'child',
-    senderName: '小明',
-    originalText: '今天项目上线了！'
+    senderName: '小天',
+    originalText: '今天复习效率特别高！'
   },
   {
     id: 'warmth_008',
@@ -348,7 +348,7 @@ CalendarApp.data.warmthMoments = [
     tag: '思念',
     summary: '想家了',
     sender: 'child',
-    senderName: '小明',
+    senderName: '小天',
     originalText: '想吃妈妈做的红烧肉了'
   },
   {
@@ -368,7 +368,7 @@ CalendarApp.data.warmthMoments = [
     tag: '感恩',
     summary: '感谢爸妈的关心',
     sender: 'child',
-    senderName: '小明',
+    senderName: '小天',
     originalText: '谢谢妈，我挺好的'
   }
 ];
@@ -377,7 +377,7 @@ CalendarApp.data.warmthMoments = [
 CalendarApp.data.anniversaries = [
   { date: '03-15', title: '妈妈生日', type: 'birthday', icon: '🎂' },
   { date: '06-20', title: '爸爸生日', type: 'birthday', icon: '🎂' },
-  { date: '10-08', title: '小明生日', type: 'birthday', icon: '🎂' },
+  { date: '10-08', title: '小天生日', type: 'birthday', icon: '🎂' },
   { date: '01-28', title: '春节', type: 'festival', icon: '🧨' },
   { date: '02-14', title: '情人节', type: 'festival', icon: '💕' },
   { date: '04-04', title: '清明节', type: 'festival', icon: '🏮' },
@@ -396,8 +396,8 @@ CalendarApp.data.memoryHooks = {
     }
   },
   child: {
-    name: '小明',
-    traits: ['在外地工作', '经常加班', '喜欢吃妈妈做的红烧肉'],
+    name: '小天',
+    traits: ['在外地上大学', '经常泡图书馆', '喜欢吃妈妈做的红烧肉'],
     concerns: ['担心父母身体', '觉得陪伴太少']
   }
 };

@@ -94,7 +94,7 @@ async function testSentiment() {
   const testTexts = [
     '我好累呀',
     '妈，我想你了',
-    '今天加班好烦',
+    '今天复习好烦',
     '谢谢妈',
     '注意身体',
     '吃了吗'
