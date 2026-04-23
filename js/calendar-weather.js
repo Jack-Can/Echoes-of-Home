@@ -165,21 +165,51 @@ CalendarApp.render.weather.showTempMeter = function() {
   alert('❤️ 情感温度: ' + temp + '°\n\n' + tempDesc + '\n\n计算依据：\n- 互动天数 × 3\n- 温情标记 × 5\n- 基础温度 30°');
 };
 
-// ========== 雨天的互动提醒 ==========
-CalendarApp.render.weather.checkRainyReminder = function() {
+// ========== 计算距离最后消息的天数 ==========
+CalendarApp.render.weather.getDaysSince = function(dateStr) {
+  if (!dateStr) return 999;
+  const lastDate = new Date(dateStr);
+  const today = new Date();
+  const diff = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+  return Math.max(1, diff);
+};
+
+// ========== 更新侧边栏 tip-box ==========
+CalendarApp.render.weather.updateTipBox = function() {
+  const tipBox = document.querySelector('.tip-box');
+  if (!tipBox) return;
+  
   const weather = CalendarApp.render.weather.calcWeather();
+  const records = CalendarApp.data.chatRecords;
+  const dates = Object.keys(records).sort();
+  const lastMsgDate = dates.length > 0 ? dates[dates.length - 1] : null;
+  const days = CalendarApp.render.weather.getDaysSince(lastMsgDate);
+  const tips = CalendarApp.data.aiSuggestions.dailyTips;
+  
   if (weather === 'rainy') {
-    return `
-      <div class="cal-rainy-alert">
-        <div class="cal-rainy-icon">🌧️</div>
-        <div class="cal-rainy-text">已经 3 天没和爸妈聊天了，要不要发个消息？</div>
-        <div class="cal-rainy-btns">
-          <button onclick="CalendarApp.render.weather.quickReply('今天吃了吗？想你们了 😊')">今天吃了吗？想你们了</button>
-          <button onclick="CalendarApp.render.weather.quickReply('刚看到一个好玩的')">刚看到一个好玩的</button>
-        </div>
+    tipBox.classList.add('rainy');
+    tipBox.innerHTML = `
+      <div class="tip-label">🌧️ 关系气象站提醒</div>
+      <div class="rainy-icon">🌧️</div>
+      <div class="rainy-text">已经 ${days} 天没和爸妈聊天了，要不要发个消息？</div>
+      <div class="rainy-btns">
+        <button onclick="CalendarApp.render.weather.quickReply('今天吃了吗？想你们了 😊')">今天吃了吗？</button>
+        <button onclick="CalendarApp.render.weather.quickReply('刚看到一个好玩的')">刚看到一个好玩的</button>
       </div>
     `;
+  } else {
+    tipBox.classList.remove('rainy');
+    const tipList = tips[weather] || tips.cloudy;
+    const randomTip = tipList[Math.floor(Math.random() * tipList.length)];
+    tipBox.innerHTML = `
+      <div class="tip-label">💡 今日锦囊</div>
+      <div class="tip-text">${randomTip}</div>
+    `;
   }
+};
+
+// ========== 雨天的互动提醒（已迁移到 tip-box，此函数仅作兼容返回空）==========
+CalendarApp.render.weather.checkRainyReminder = function() {
   return '';
 };
 

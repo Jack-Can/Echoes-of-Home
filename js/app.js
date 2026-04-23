@@ -66,6 +66,10 @@ function init() {
   renderChatHistory();
   bindEvents();
   createAttachConfirmModal();
+  if (CalendarApp && CalendarApp.render && CalendarApp.render.weather) {
+    CalendarApp.render.weather.updateTipBox();
+    updateWeatherCard();
+  }
 }
 
 function getCurrentRole() {
@@ -132,7 +136,12 @@ function getLetterPreview(content) {
 
 function updateHeaderByIdentity() {
   if (!headerPeerName) return;
-  headerPeerName.textContent = CURRENT_USER === 'child' ? '老妈' : '孩子';
+  const peerName = CURRENT_USER === 'child' ? '老妈' : '孩子';
+  headerPeerName.textContent = peerName;
+  if (headerTitle) {
+    const dotHtml = '<span class="header-dot">沟通中...</span>';
+    headerTitle.innerHTML = `正在与 <strong>${peerName}</strong> ${dotHtml}`;
+  }
 }
 
 function bindEvents() {
@@ -482,6 +491,35 @@ function switchIdentity(identity) {
   updateHeaderByIdentity();
   updateComposeHeader();
   renderChatHistory();
+  if (CalendarApp && CalendarApp.render && CalendarApp.render.weather) {
+    CalendarApp.render.weather.updateTipBox();
+    updateWeatherCard();
+  }
+}
+
+// ========== 更新侧边栏天气卡片 ==========
+function updateWeatherCard() {
+  const weatherCard = document.querySelector('.weather-card');
+  if (!weatherCard) return;
+
+  const weather = CalendarApp.render.weather.calcWeather();
+  const records = CalendarApp.data.chatRecords;
+  const dates = Object.keys(records).sort();
+  const lastMsgDate = dates.length > 0 ? dates[dates.length - 1] : null;
+  const days = CalendarApp.render.weather.getDaysSince(lastMsgDate);
+
+  const weatherMap = {
+    sunny: { emoji: '☀️', status: '晴朗', detail: days === 1 ? '已联系：刚刚' : `已联系：${days}天前` },
+    cloudy: { emoji: '⛅', status: '多云', detail: `已联系：${days}天前` },
+    rainy: { emoji: '🌧️', status: '雨天', detail: `已联系：${days}天前` }
+  };
+
+  const info = weatherMap[weather] || weatherMap.sunny;
+  weatherCard.innerHTML = `
+    <div class="weather-emoji">${info.emoji}</div>
+    <div class="weather-status">当前关系：${info.status}</div>
+    <div class="weather-detail">${info.detail}</div>
+  `;
 }
 
 // ========== 父母端输入模式切换 ==========
@@ -513,7 +551,7 @@ function sendMessage() {
   const text = msgInput.value.trim();
   if (!text) return;
 
-  // 演示版硬条件：仅检测完整关键词“你好烦啊”
+  // 演示版硬条件：仅检测完整关键词"你好烦啊"
   if (CURRENT_USER === 'child' && containsEmotionKeyword(text)) {
     pendingBufferMsg = text;
     openEmotionModal(text);
@@ -524,6 +562,10 @@ function sendMessage() {
     appendChatBubble('me', text);
     msgInput.value = '';
     LATEST_INPUT_TEXT = '';
+    if (CalendarApp && CalendarApp.render && CalendarApp.render.weather) {
+      CalendarApp.render.weather.updateTipBox();
+      updateWeatherCard();
+    }
   }
 }
 
@@ -536,6 +578,10 @@ function sendMessageParent() {
   if (CURRENT_USER === 'parent') {
     appendChatBubble('me', text);
     input.value = '';
+    if (CalendarApp && CalendarApp.render && CalendarApp.render.weather) {
+      CalendarApp.render.weather.updateTipBox();
+      updateWeatherCard();
+    }
   }
 }
 
@@ -1412,9 +1458,7 @@ function switchView(view) {
     navCalendar.classList.remove('active');
     chatWrapper.style.display = 'flex';
     calWrapper.style.display = 'none';
-    if (headerTitle) {
-      headerTitle.innerHTML = '正在与 <strong>老妈</strong> <span class="header-dot">沟通中...</span>';
-    }
+    updateHeaderByIdentity();
   } else {
     navChat.classList.remove('active');
     navCalendar.classList.add('active');
