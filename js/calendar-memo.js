@@ -4,7 +4,7 @@ CalendarApp.render.memo = {};
 
 // ========== 获取临近的纪念日 ==========
 CalendarApp.render.memo.getUpcoming = function() {
-  const today = new Date(2026, 3, 19); // 模拟今天是4月19日
+  const today = new Date();
   const upcoming = [];
   
   CalendarApp.data.anniversaries.forEach(a => {
@@ -42,7 +42,7 @@ CalendarApp.render.memo.renderAlert = function() {
 // ========== 渲染回家倒计时 ==========
 CalendarApp.render.memo.renderCountdown = function() {
   const custom = CalendarApp.data.anniversaries.find(a => a.type === 'custom');
-  const today = new Date(2026, 3, 19);
+  const today = new Date();
   
   if (!custom) {
     return `
@@ -55,17 +55,11 @@ CalendarApp.render.memo.renderCountdown = function() {
   
   const target = new Date(custom.fullDate);
   const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-  const totalDays = parseInt(custom.countTo.split('-')[2]) - parseInt(custom.countFrom.split('-')[2]);
-  const progress = Math.min(100, Math.max(0, ((totalDays - diff) / totalDays) * 100));
   
   return `
     <div class="cal-countdown">
-      <div class="cal-countdown-title">🏠 距离${custom.title}还有 ${diff} 天</div>
+      <div class="cal-countdown-title">🏠 距离${custom.title}${custom.fullDate}还有</div>
       <div class="cal-countdown-days">${diff} 天</div>
-      <div class="cal-countdown-progress">
-        <div class="cal-countdown-bar" style="width: ${progress}%;"></div>
-      </div>
-      <div class="cal-countdown-percent">${Math.round(progress)}%</div>
     </div>
   `;
 };

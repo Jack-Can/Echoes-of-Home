@@ -381,8 +381,9 @@ CalendarApp.data.anniversaries = [
   { date: '01-28', title: '春节', type: 'festival', icon: '🧨' },
   { date: '02-14', title: '情人节', type: 'festival', icon: '💕' },
   { date: '04-04', title: '清明节', type: 'festival', icon: '🏮' },
-  { date: 'custom_001', title: '回家日', type: 'custom', icon: '🏠',
-    fullDate: '2026-05-01', countFrom: '2026-01-01', countTo: '2026-05-01' }
+  { date: 'custom_001', title: '回家日', type: 'custom', icon: '🏠', markerIcon: '⭐',
+    fullDate: '2026-05-01', countFrom: '2026-01-01', countTo: '2026-05-01',
+    monthDay: '05-01' }
 ];
 
 // ========== 记忆钩子数据 ==========

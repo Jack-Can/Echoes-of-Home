@@ -207,7 +207,7 @@ CalendarApp.render.weather.updateTipBox = function() {
       <div class="rainy-text">已经 ${days} 天没和${targetName}聊天了，要不要发个消息？</div>
       <div class="rainy-btns">
         <button onclick="CalendarApp.render.weather.quickReply('${isParent ? '孩子，今天怎么样？' : '今天吃了吗？想你们了 😊'}')">${isParent ? '孩子，今天怎么样？' : '今天吃了吗？'}</button>
-        <button onclick="CalendarApp.render.weather.quickReply('${isParent ? '刚看到一个好玩的' : '刚看到一个好玩的'}')">${isParent ? '好玩的' : '好玩的'}</button>
+        <button onclick="CalendarApp.render.weather.quickReply('${isParent ? '刚看到一个好玩的' : '刚看到一个好玩的'}')">${isParent ? '看到一个好玩的' : '看到一个好玩的'}</button>
       </div>
     `;
   } else {

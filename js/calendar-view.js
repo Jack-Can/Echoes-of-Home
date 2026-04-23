@@ -94,7 +94,10 @@ CalendarApp.render.monthCells = function(year, month, monthData) {
     const isToday = dateStr === todayStr;
     const isSelected = dateStr === CalendarApp.state.selectedDate;
     const hasData = CalendarApp.data.chatRecords[dateStr] && CalendarApp.data.chatRecords[dateStr].length > 0;
-    const isAnniversary = CalendarApp.data.anniversaries.some(a => a.date === `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+    const isAnniversary = CalendarApp.data.anniversaries.some(a => {
+      const monthDay = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return a.date === monthDay || (a.monthDay && a.monthDay === monthDay);
+    });
     
     html += CalendarApp.render.cell(day, dateStr, false, isToday, isSelected, hasData, isAnniversary);
   }
@@ -128,7 +131,14 @@ CalendarApp.render.cell = function(day, dateStr, isOtherMonth, isToday, isSelect
     if (hasChat) dots += '<span class="cal-cell-dot cal-cell-dot--chat"></span>';
     if (hasVoice) dots += '<span class="cal-cell-dot cal-cell-dot--voice"></span>';
     if (hasWarmth) dots += '<span class="cal-cell-dot cal-cell-dot--warmth">❤️</span>';
-    if (isAnniversary) dots += '<span class="cal-cell-dot cal-cell-dot--anniversary">🎂</span>';
+    if (isAnniversary) {
+      const monthDay = dateStr.substring(5); // "2026-05-01" → "05-01"
+      const anniv = CalendarApp.data.anniversaries.find(a => 
+        a.date === monthDay || (a.monthDay && a.monthDay === monthDay)
+      );
+      const icon = (anniv && anniv.markerIcon) ? anniv.markerIcon : (anniv ? anniv.icon : '🎂');
+      dots += `<span class="cal-cell-dot cal-cell-dot--anniversary">${icon}</span>`;
+    }
   }
   
   return `
